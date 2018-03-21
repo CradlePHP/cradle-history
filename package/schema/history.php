@@ -191,7 +191,7 @@ return [
     ],
     'relations' => [
         [
-          'many' => '0',
+          'many' => '1',
           'name' => 'profile',
         ]
     ],
