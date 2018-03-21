@@ -1,0 +1,19 @@
+<div class="clearfix mb-4 search-actions">
+    <div class="float-left mr-2">
+        <div class="input-group">
+            <select class="form-control" name="range" data-do="object-range" data-on="change">
+                <option value="25" {{#when range '==' '25'}}selected{{/when}}>Show 25</option>
+                <option value="50" {{#when range '==' '50'}}selected{{/when}}>Show 50</option>
+                <option value="100" {{#when range '==' '100'}}selected{{/when}}>Show 100</option>
+                <option value="200" {{#when range '==' '200'}}selected{{/when}}>Show 200</option>
+                <option value="0" {{#when range '==' '0'}}selected{{/when}}>Show All</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="float-right">
+        <a class="btn btn-purple" href="export/csv?{{query}}" target="_blank">
+            <i class="fas fa-download"></i> Export
+        </a>
+    </div>
+</div>

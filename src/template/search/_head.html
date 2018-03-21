@@ -1,0 +1,27 @@
+<tr>
+    <th>
+        <a href="?{{sorturl 'order' schema.primary}}">
+            ID
+            {{{sortcaret 'order' schema.primary}}}
+        </a>
+    </th>
+    {{#each schema.relations}}
+        {{#when many '==' 1}}
+            <th>{{singular}}</th>
+        {{/when}}
+    {{/each}}
+    {{#each schema.fields}}
+        {{#in ../schema.listable @key}}
+            {{#in ../schema.sortable @key}}
+                <th>
+                    <a href="?{{sorturl 'order' @key}}">
+                        {{label}}
+                        {{{sortcaret 'order' @key}}}
+                    </a>
+                </th>
+            {{else}}
+                <th>{{label}}</th>
+            {{/in}}
+        {{/in}}
+    {{/each}}
+</tr>
