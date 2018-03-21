@@ -19,8 +19,8 @@ $this->on('history-create', function ($request, $response) {
     //set history as schema
     $request->setStage('schema', 'history');
 
-    //trigger object create
-    $this->trigger('system-object-create', $request, $response);
+    //trigger model create
+    $this->trigger('system-model-create', $request, $response);
 });
 
 /**
@@ -33,8 +33,8 @@ $this->on('history-detail', function ($request, $response) {
     //set history as schema
     $request->setStage('schema', 'history');
 
-    //trigger object detail
-    $this->trigger('system-object-detail', $request, $response);
+    //trigger model detail
+    $this->trigger('system-model-detail', $request, $response);
 });
 
 /**
@@ -47,8 +47,8 @@ $this->on('history-remove', function ($request, $response) {
     //set history as schema
     $request->setStage('schema', 'history');
 
-    //trigger object remove
-    $this->trigger('system-object-remove', $request, $response);
+    //trigger model remove
+    $this->trigger('system-model-remove', $request, $response);
 });
 
 /**
@@ -61,8 +61,8 @@ $this->on('history-restore', function ($request, $response) {
     //set history as schema
     $request->setStage('schema', 'history');
 
-    //trigger object restore
-    $this->trigger('system-object-restore', $request, $response);
+    //trigger model restore
+    $this->trigger('system-model-restore', $request, $response);
 });
 
 /**
@@ -75,8 +75,8 @@ $this->on('history-search', function ($request, $response) {
     //set history as schema
     $request->setStage('schema', 'history');
 
-    //trigger object search
-    $this->trigger('system-object-search', $request, $response);
+    //trigger model search
+    $this->trigger('system-model-search', $request, $response);
 });
 
 /**
@@ -89,8 +89,8 @@ $this->on('history-update', function ($request, $response) {
     //set history as schema
     $request->setStage('schema', 'history');
 
-    //trigger object update
-    $this->trigger('system-object-update', $request, $response);
+    //trigger model update
+    $this->trigger('system-model-update', $request, $response);
 });
 
 /**
@@ -113,9 +113,6 @@ $this->on('history-mark-as-read', function ($request, $response) {
 
     //load schema
     $schema = Schema::i($request->getStage('schema'));
-
-    //this/these will be used a lot
-    $objectSql = $schema->object()->service('sql');
 
     //get primary
     $primary = $schema->getPrimaryFieldName();

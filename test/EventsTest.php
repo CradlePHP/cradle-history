@@ -15,7 +15,7 @@ use Cradle\Http\Response;
  * Event test
  *
  * @vendor   Cradle
- * @package  Object
+ * @package  Model
  * @author   John Doe <john@acme.com>
  */
 class Cradle_History_EventsTest extends TestCase
@@ -51,9 +51,9 @@ class Cradle_History_EventsTest extends TestCase
     /**
      * history-create
      *
-     * @covers Cradle\Module\System\Object\Validator::getCreateErrors
-     * @covers Cradle\Module\System\Object\Validator::getOptionalErrors
-     * @covers Cradle\Module\System\Object\Service\SqlService::create
+     * @covers Cradle\Module\System\Model\Validator::getCreateErrors
+     * @covers Cradle\Module\System\Model\Validator::getOptionalErrors
+     * @covers Cradle\Package\System\Model\Service\SqlService::create
      * @covers Cradle\Module\System\Utility\Service\AbstractElasticService::create
      * @covers Cradle\Module\System\Utility\Service\AbstractRedisService::createDetail
      */
@@ -80,9 +80,9 @@ class Cradle_History_EventsTest extends TestCase
     /**
      * history-detail
      *
-     * @covers Cradle\Module\System\Object\Validator::getCreateErrors
-     * @covers Cradle\Module\System\Object\Validator::getOptionalErrors
-     * @covers Cradle\Module\System\Object\Service\SqlService::create
+     * @covers Cradle\Module\System\Model\Validator::getCreateErrors
+     * @covers Cradle\Module\System\Model\Validator::getOptionalErrors
+     * @covers Cradle\Package\System\Model\Service\SqlService::create
      * @covers Cradle\Module\System\Utility\Service\AbstractElasticService::create
      * @covers Cradle\Module\System\Utility\Service\AbstractRedisService::createDetail
      */
@@ -100,8 +100,8 @@ class Cradle_History_EventsTest extends TestCase
     /**
      * history-remove
      *
-     * @covers Cradle\Module\System\Object\Service\SqlService::get
-     * @covers Cradle\Module\System\Object\Service\SqlService::update
+     * @covers Cradle\Package\System\Model\Service\SqlService::get
+     * @covers Cradle\Package\System\Model\Service\SqlService::update
      * @covers Cradle\Module\System\Utility\Service\AbstractElasticService::remove
      * @covers Cradle\Module\System\Utility\Service\AbstractRedisService::removeDetail
      */
@@ -119,8 +119,8 @@ class Cradle_History_EventsTest extends TestCase
     /**
      * history-restore
      *
-     * @covers Cradle\Module\System\Object\Service\SqlService::get
-     * @covers Cradle\Module\System\Object\Service\SqlService::update
+     * @covers Cradle\Package\System\Model\Service\SqlService::get
+     * @covers Cradle\Package\System\Model\Service\SqlService::update
      * @covers Cradle\Module\System\Utility\Service\AbstractElasticService::remove
      * @covers Cradle\Module\System\Utility\Service\AbstractRedisService::removeDetail
      */
@@ -138,8 +138,8 @@ class Cradle_History_EventsTest extends TestCase
     /**
      * history-search
      *
-     * @covers Cradle\Module\System\Object\Service\SqlService::search
-     * @covers Cradle\Module\System\Object\Service\ElasticService::search
+     * @covers Cradle\Package\System\Model\Service\SqlService::search
+     * @covers Cradle\Package\System\Model\Service\ElasticService::search
      * @covers Cradle\Module\System\Utility\Service\AbstractRedisService::getSearch
      */
     public function testHistorySearch()
@@ -160,8 +160,8 @@ class Cradle_History_EventsTest extends TestCase
     /**
      * history-update
      *
-     * @covers Cradle\Module\System\Object\Service\SqlService::get
-     * @covers Cradle\Module\System\Object\Service\SqlService::update
+     * @covers Cradle\Package\System\Model\Service\SqlService::get
+     * @covers Cradle\Package\System\Model\Service\SqlService::update
      * @covers Cradle\Module\System\Utility\Service\AbstractElasticService::remove
      * @covers Cradle\Module\System\Utility\Service\AbstractRedisService::removeDetail
      */
@@ -181,8 +181,8 @@ class Cradle_History_EventsTest extends TestCase
     /**
      * history-update
      *
-     * @covers Cradle\Module\System\Object\Service\SqlService::get
-     * @covers Cradle\Module\System\Object\Service\SqlService::update
+     * @covers Cradle\Package\System\Model\Service\SqlService::get
+     * @covers Cradle\Package\System\Model\Service\SqlService::update
      * @covers Cradle\Module\System\Utility\Service\AbstractElasticService::remove
      * @covers Cradle\Module\System\Utility\Service\AbstractRedisService::removeDetail
      */

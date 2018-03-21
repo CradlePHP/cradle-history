@@ -7,29 +7,6 @@
 use Cradle\Package\System\Schema;
 
 /**
- * Renders a create form
- *
- * @param Request $request
- * @param Response $response
- */
-$this->get('/admin/history/detail/:history_id', function ($request, $response) {
-    //----------------------------//
-    //set redirect
-    $request->setStage('redirect_uri', '/admin/history/search');
-
-    //now let the object detail take over
-    $this->routeTo(
-        'get',
-        sprintf(
-            '/admin/system/object/history/detail/%s',
-            $request->getStage('history_id')
-        ),
-        $request,
-        $response
-    );
-});
-
-/**
  * Renders a search page
  *
  * @param Request $request
@@ -165,11 +142,11 @@ $this->get('/admin/history/export/:type', function ($request, $response) {
     //set redirect
     $request->setStage('redirect_uri', '/admin/profile/search');
 
-    //now let the object update take over
+    //now let the model update take over
     $this->routeTo(
         'get',
         sprintf(
-            '/admin/system/object/history/export/%s',
+            '/admin/system/model/history/export/%s',
             $request->getStage('type')
         ),
         $request,
