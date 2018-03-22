@@ -17,6 +17,61 @@ $this->addLogger(function($message, $request, $response) {
     $logRequest = Request::i()->load();
     $logResponse = Response::i()->load();
 
+    //get data
+    $result = $response->getResults();
+    $stage = $request->getStage();
+    $post = $request->getPost();
+    $body = $request->getBody();
+
+    parse_str($body, $body);
+
+    //change variables and check if string is too long
+    foreach ($result as $key => $value) {
+        if (!is_array($result[$key])) {
+            if (isset($stage[$key])) {
+                $stage[$key] = $value;
+
+                if (!is_array($result[$key]) && strlen($stage[$key]) > 300) {
+                    $stage[$key] = '< DATA TOO LONG >';
+                }
+            }
+
+            if (isset($post[$key])) {
+                $post[$key] = $value;
+
+                if (!is_array($result[$key]) && strlen($post[$key]) > 300) {
+                    $post[$key] = '< DATA TOO LONG >';
+                }
+            }
+
+            if (isset($body[$key])) {
+                $body[$key] = $value;
+
+                if (!is_array($result[$key]) && strlen($body[$key]) > 300) {
+                    $body[$key] = '< DATA TOO LONG >';
+                }
+            }
+
+            if (strlen($result[$key]) > 300) {
+                $result[$key] = '< DATA TOO LONG >';
+            }
+
+            continue;
+        }
+
+        $result[$key] = json_encode($result[$key]);
+
+        if (strlen($result[$key]) > 300) {
+            $result[$key] = '< DATA TOO LONG >';
+        }
+    }
+
+    //then reset
+    $request->setStage($stage);
+    $request->setPost($post);
+    $request->setBody(http_build_query($body));
+    $response->setError(false)->setResults($result);
+
     //record logs
     $logRequest
         ->setStage('history_remote_address', $request->getServer('REMOTE_ADDR'))

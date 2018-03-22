@@ -24,8 +24,19 @@ $this->on('cradlephp-cradle-history-install', function ($request, $response) {
     //custom name of this package
     $name = 'cradlephp/cradle-history';
 
+    //get the current version
+    $current = $this->package('global')->config('packages', $name);
+
+    // if version is set
+    if (is_array($current) && isset($current['version'])) {
+        // get the current version
+        $current = $current['version'];
+    } else {
+        $current = null;
+    }
+
     //if it's already installed
-    if ($this->package('global')->config('packages', $name)) {
+    if ($current) {
         $message = sprintf('%s is already installed', $name);
         return $response->setError(true, $message);
     }
@@ -198,6 +209,7 @@ $this->on('cradlephp-cradle-history-elastic-flush', function ($request, $respons
 
         // set parameters
         $request->setStage('name', $data['name']);
+
         // trigger global schema flush
         $this->trigger('system-schema-flush-elastic', $request, $response);
         // intercept error
@@ -245,6 +257,7 @@ $this->on('cradlephp-cradle-history-elastic-map', function ($request, $response)
 
         // set parameters
         $request->setStage('name', $data['name']);
+
         // trigger global schema flush
         $this->trigger('system-schema-map-elastic', $request, $response);
 
