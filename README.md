@@ -1,6 +1,6 @@
-# Cradle History Package 
+## History
 
-history manager.
+Cradle history logs actions made by users.
 
 ## Install
 
@@ -8,9 +8,13 @@ history manager.
 composer install cradlephp/cradle-history
 ```
 
-## History
+### Usage
 
-Cradle history handles everything about the history. It is based on CradlePHP/cradle-system. 
+Place this in any route or event.
+
+```php
+$this->log('<MESSAGE>', $request, $response);
+```
 
 ### History Routes
 
@@ -29,13 +33,3 @@ The following routes are available in the admin.
  - `history-update`
  - `history-export`
  - `history-mark-as-read`
-
-### History Example
-
-```PHP
-$this->log(
-	< MESSAGE >,
-	$request,
-	$response
-);
-```
