@@ -43,16 +43,16 @@
     {{#if rows.length}}
         <div class="box search-filters">
             <div class="box-head box-default">
-                <h3 class="box-title">Filters</h3>
+                <h3 class="box-title">{{_ 'Filters'}}</h3>
             </div>
             <form method="get">
                 <div class="box-body box-padding">
                     <div class="form-group">
-                        <label for="q">Search</label>
+                        <label for="q">{{_ 'Search'}}</label>
                         <input
                             class="form-control"
                             name="q"
-                            placeholder="Enter Search {{schema.plural}}"
+                            placeholder="{{_'Enter Search %s' schema.plural}}"
                             type="search"
                             value="{{q}}"
                         />
@@ -68,10 +68,10 @@
                 </div>
                 <div class="box-foot box-light">
                     <div class="box-left">
-                        <button class="btn btn-danger" type="reset">Reset</button>
+                        <button class="btn btn-danger" type="reset">{{_ 'Reset'}}</button>
                     </div>
                     <div class="box-right">
-                        <button class="btn btn-primary">Search</button>
+                        <button class="btn btn-primary">{{_ 'Search'}}</button>
                     </div>
                 </div>
             </form>
@@ -121,7 +121,7 @@
 
         <!-- START: NO RESULTS -->
         <div class="alert alert-info no-results">
-            <center>No Results Found.</center>
+            <center>{{_ 'No Results Found.'}}</center>
         </div>
         <!-- END: NO RESULTS -->
     {{/if}}
