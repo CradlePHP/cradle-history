@@ -10,64 +10,64 @@ require_once __DIR__ . '/package/helpers.php';
 use Cradle\Http\Request;
 use Cradle\Http\Response;
 
+
+
 $this->addLogger(function($message, $request, $response) {
     $logRequest = Request::i()->load();
     $logResponse = Response::i()->load();
 
     //get data
-    $result = $response->getResults();
-    $stage = $request->getStage();
-    $post = $request->getPost();
-    $body = $request->getBody();
+    $data = [];
+    $data['results'] = $response->hasResults() ? $response->getResults() : '';
+    $data['stage'] = $request->hasStage() ? $request->getStage() : '';
+    $data['post'] = $request->hasPost() ? $request->getPost() : '';
+    $body = !empty($request->getBody()) ? $request->getBody(): '';
 
-    parse_str($body, $body);
+    if (strlen($body) > 300) {
+        $body = '< DATA TOO LONG >';
+    }
 
-    //change variables and check if string is too long
-    foreach ($result as $key => $value) {
-        if (!is_array($result[$key])) {
-            if (isset($stage[$key])) {
-                $stage[$key] = $value;
+    //case for long string and data
+    foreach ($data as $keyword => $result) {
+        if (is_array($result)) {
+            foreach ($result as $key => $row) {
+                if (is_array($row)) {
+                    if (count($row) > 100) {
+                        $data[$keyword][$key] = '< DATA TOO LONG >';
+                        continue;
+                    }
 
-                if (!is_array($result[$key]) && strlen($stage[$key]) > 300) {
-                    $stage[$key] = '< DATA TOO LONG >';
+                    foreach ($row as $id => $value) {
+                        if (is_array($value)) {
+                            $value = json_encode($value);
+                        }
+
+                        if (strlen($value) > 300) {
+                            $data[$keyword][$key][$id] = '< DATA TOO LONG >';
+                        }
+                    }
+
+                    continue;
                 }
-            }
 
-            if (isset($post[$key])) {
-                $post[$key] = $value;
-
-                if (!is_array($result[$key]) && strlen($post[$key]) > 300) {
-                    $post[$key] = '< DATA TOO LONG >';
+                if (strlen($row) > 300) {
+                    $data[$keyword][$key] = '< DATA TOO LONG >';
                 }
-            }
-
-            if (isset($body[$key])) {
-                $body[$key] = $value;
-
-                if (!is_array($result[$key]) && strlen($body[$key]) > 300) {
-                    $body[$key] = '< DATA TOO LONG >';
-                }
-            }
-
-            if (strlen($result[$key]) > 300) {
-                $result[$key] = '< DATA TOO LONG >';
             }
 
             continue;
         }
 
-        $result[$key] = json_encode($result[$key]);
-
-        if (strlen($result[$key]) > 300) {
-            $result[$key] = '< DATA TOO LONG >';
+        if (strlen($result) > 300) {
+            $data[$keyword] = '< DATA TOO LONG >';
         }
     }
 
     //then reset
-    $request->setStage($stage);
-    $request->setPost($post);
-    $request->setBody(http_build_query($body));
-    $response->setError(false)->setResults($result);
+    $request->setStage($data['stage']);
+    $request->setPost($data['post']);
+    $request->setBody($body);
+    $response->setError(false)->setResults($data['results']);
 
     //record logs
     $logRequest
