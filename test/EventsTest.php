@@ -60,7 +60,6 @@ class Cradle_History_EventsTest extends TestCase
     public function testHistoryCreate()
     {
         $this->request->setStage([
-            'schema' => 'history',
             'history_remote_address' => '127.0.0.1',
             'history_activity' => 'Test',
             'history_page' => '/',
@@ -89,7 +88,6 @@ class Cradle_History_EventsTest extends TestCase
     public function testHistoryDetail()
     {
         $this->request->setStage([
-            'schema' => 'history',
             'history_id' => 1
         ]);
 
@@ -108,7 +106,6 @@ class Cradle_History_EventsTest extends TestCase
     public function testHistoryRemove()
     {
         $this->request->setStage([
-            'schema' => 'history',
             'history_id' => self::$id
         ]);
 
@@ -127,7 +124,6 @@ class Cradle_History_EventsTest extends TestCase
     public function testHistoryRestore()
     {
         $this->request->setStage([
-            'schema' => 'history',
             'history_id' => self::$id
         ]);
 
@@ -145,7 +141,6 @@ class Cradle_History_EventsTest extends TestCase
     public function testHistorySearch()
     {
         $this->request->setStage([
-            'schema' => 'history',
             'order' => ['history_id' => 'ASC']
         ]);
 
@@ -168,7 +163,6 @@ class Cradle_History_EventsTest extends TestCase
     public function testHistoryUpdate()
     {
         $this->request->setStage([
-            'schema' => 'history',
             'history_id' => self::$id,
             'history_activity' => 'New Test Activity'
         ]);
@@ -188,10 +182,6 @@ class Cradle_History_EventsTest extends TestCase
      */
     public function testHistoryMarkAsRead()
     {
-        $this->request->setStage([
-            'schema' => 'history',
-        ]);
-
         cradle()->trigger('history-mark-as-read', $this->request, $this->response);
 
         $this->assertTrue(!empty($this->response->getResults()));
