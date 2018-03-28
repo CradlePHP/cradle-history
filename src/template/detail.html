@@ -1,0 +1,58 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/admin">
+                <i class="fas fa-home"></i> Admin
+            </a>
+        </li>
+        {{#if relation.suggestion}}
+            <li class="breadcrumb-item">
+                <a href="/admin/system/model/{{relation.schema.name}}/search">
+                    <i class="{{relation.schema.icon}}"></i> {{relation.schema.plural}}
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/admin/system/model/{{relation.schema.name}}/update/{{scope relation.data relation.schema.primary}}">
+                    {{relation.suggestion}}
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/admin/system/model/{{schema.name}}/search/{{relation.schema.name}}/{{scope relation.data relation.schema.primary}}">
+                    <i class="fas fa-{{schema.icon}}"></i> {{schema.plural}}
+                </a>
+            </li>
+        {{else}}
+            <li class="breadcrumb-item">
+                <a href="/admin/system/model/{{schema.name}}/search">
+                    <i class="fas fa-{{schema.icon}}"></i> {{schema.plural}}
+                </a>
+            </li>
+        {{/if}}
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-plus"></i> {{title}}
+        </li>
+    </ol>
+</nav>
+
+<div class="main-padding">
+    {{> detail_detail}}
+
+    {{#if relation.suggestion}}
+        <h3 class="main-title">
+            <i class="{{relation.schema.icon}}"></i>
+            {{relation.suggestion}}
+        </h3>
+    {{/if}}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="box">
+                <div class="box-head box-default">
+                    <div class="box-title">{{_ 'History Meta'}}</div>
+                </div>
+                <div class="box-body box-padding">
+                    <pre  class="prettyprint linenums" data-do="prettify"><code>{{item.history_meta}}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

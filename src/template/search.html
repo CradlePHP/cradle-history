@@ -43,16 +43,16 @@
     {{#if rows.length}}
         <div class="box search-filters">
             <div class="box-head box-default">
-                <h3 class="box-title">{{_ 'Filters'}}</h3>
+                <h3 class="box-title">Filters</h3>
             </div>
             <form method="get">
                 <div class="box-body box-padding">
                     <div class="form-group">
-                        <label for="q">{{_ 'Search'}}</label>
+                        <label for="q">Search</label>
                         <input
                             class="form-control"
                             name="q"
-                            placeholder="{{_'Enter Search %s' schema.plural}}"
+                            placeholder="Enter Search {{schema.plural}}"
                             type="search"
                             value="{{q}}"
                         />
@@ -68,10 +68,10 @@
                 </div>
                 <div class="box-foot box-light">
                     <div class="box-left">
-                        <button class="btn btn-danger" type="reset">{{_ 'Reset'}}</button>
+                        <button class="btn btn-danger" type="reset">Reset</button>
                     </div>
                     <div class="box-right">
-                        <button class="btn btn-primary">{{_ 'Search'}}</button>
+                        <button class="btn btn-primary">Search</button>
                     </div>
                 </div>
             </form>
@@ -88,6 +88,11 @@
                     <tbody>
                         {{#each rows}}
                             <tr data-id="{{scope this ../schema.primary}}">
+                                <td>
+                                    <a href="/admin/history/detail/{{scope this ../schema.primary}}" title="{{_ 'View History Detail'}}">
+                                        <i class="fas fa-history"></i>
+                                    </a>
+                                </td>
                                 <td>{{scope this ../schema.primary}}</td>
                                 {{#each ../schema.relations}}
                                     {{#when many '==' 1}}
@@ -121,7 +126,7 @@
 
         <!-- START: NO RESULTS -->
         <div class="alert alert-info no-results">
-            <center>{{_ 'No Results Found.'}}</center>
+            <center>No Results Found.</center>
         </div>
         <!-- END: NO RESULTS -->
     {{/if}}
