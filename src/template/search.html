@@ -2,7 +2,7 @@
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
             <a href="/admin">
-                <i class="fas fa-home"></i> Admin
+                <i class="fas fa-home"></i> {{_ 'Admin'}}
             </a>
         </li>
         <li class="breadcrumb-item active" aria-current="page">
@@ -20,7 +20,7 @@
                 <i class="fas fa-arrow-right"></i>
             {{/if}}
             <i class="fa fa-{{schema.icon}}"></i>
-            {{number total}} Inactive {{schema.plural}}
+            {{number total}} {{_ 'Inactive'}} {{schema.plural}}
             {{#if q.0}}
                 matching {{q.0}}
             {{/if}}
@@ -43,12 +43,12 @@
     {{#if rows.length}}
         <div class="box search-filters">
             <div class="box-head box-default">
-                <h3 class="box-title">Filters</h3>
+                <h3 class="box-title">{{_ 'Filters'}}</h3>
             </div>
             <form method="get">
                 <div class="box-body box-padding">
                     <div class="form-group">
-                        <label for="q">Search</label>
+                        <label for="q">{{_ 'Search'}}</label>
                         <input
                             class="form-control"
                             name="q"
@@ -68,10 +68,10 @@
                 </div>
                 <div class="box-foot box-light">
                     <div class="box-left">
-                        <button class="btn btn-danger" type="reset">Reset</button>
+                        <button class="btn btn-danger" type="reset">{{_ 'Reset'}}</button>
                     </div>
                     <div class="box-right">
-                        <button class="btn btn-primary">Search</button>
+                        <button class="btn btn-primary">{{_ 'Search'}}</button>
                     </div>
                 </div>
             </form>
@@ -126,7 +126,7 @@
 
         <!-- START: NO RESULTS -->
         <div class="alert alert-info no-results">
-            <center>No Results Found.</center>
+            <center>{{_ 'No Results Found'}}.</center>
         </div>
         <!-- END: NO RESULTS -->
     {{/if}}
