@@ -103,7 +103,7 @@ $this->on('history-mark-as-read', function ($request, $response) {
     //search all unread history
     $request->setStage('filter', 'history_flag', 0);
     $request->setStage('nocache', 1);
-    cradle()->trigger('history-search', $request, $response);
+    $this->trigger('history-search', $request, $response);
 
     $logs = $response->getResults();
 
