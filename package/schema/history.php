@@ -91,10 +91,10 @@ return [
         ],
         [
             'disable' => '1',
-            'label' => 'Meta',
-            'name' => 'meta',
+            'label' => 'Path',
+            'name' => 'path',
             'field' => [
-                'type' => 'meta',
+                'type' => 'text',
             ],
             'list' => [
                 'format' => 'hide',
