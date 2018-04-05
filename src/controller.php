@@ -126,7 +126,7 @@ $this->get('/admin/history/search', function ($request, $response) {
     if ($request->getStage('render') === 'body') {
         return;
     }
-    // cradle()->inspect($data['schema']['relations']['history_profile']); exit;
+
     //render page
     $this->trigger('admin-render-page', $request, $response);
 });
