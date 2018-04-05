@@ -126,7 +126,7 @@ $this->get('/admin/history/search', function ($request, $response) {
     if ($request->getStage('render') === 'body') {
         return;
     }
-    // cradle()->inspect($data['schema']['relations']['history_profile']); exit;
+    
     //render page
     $this->trigger('admin-render-page', $request, $response);
 });
@@ -321,7 +321,7 @@ $cradle->get('/admin/history/:action/logs', function ($request, $response) {
             $request->setStage('nocache', 1);
             $request->setStage('order', 'history_created', 'DESC');
 
-            cradle()->trigger('history-search', $request, $response);
+            $this->trigger('history-search', $request, $response);
 
             $results = $response->getResults();
 
@@ -359,7 +359,7 @@ $cradle->get('/admin/history/:action/logs', function ($request, $response) {
             break;
         case 'read':
             //mark all unread logs to read
-            cradle()->trigger('history-mark-as-read', $request, $response);
+            $this->trigger('history-mark-as-read', $request, $response);
 
             $results = $response->getResults();
 
