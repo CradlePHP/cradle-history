@@ -56,7 +56,7 @@ $this->addLogger(function($message, $request, $response) {
     ]));
 
     //record logs
-    $logRequest->setStage('history_meta', basename($filename));
+    $logRequest->setStage('history_path', basename($filename));
     $this->trigger('history-create', $logRequest, $logResponse);
 });
 
