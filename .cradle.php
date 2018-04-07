@@ -34,7 +34,7 @@ $this->addLogger(function($message, $request, $response) {
 
     //case for relative like /some/absolute vs absolute
     if (strpos($logPath, '/') !== 0) {
-        $logPath = $this->package('global')->path('root') . '/';
+        $logPath = $this->package('global')->path('root') . '/' . $logPath;
     }
 
     //generate uniq file name
