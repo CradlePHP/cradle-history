@@ -24,44 +24,39 @@ $this->addLogger(function($message, $request, $response) {
         ->setStage('history_activity', $message)
         ->setStage('history_flag', 0);
 
-    $config = $this->package('global')->config('settings');
+    //try to get the log path from settings
+    $logPath = $this->package('global')->config('setting', 'log');
 
-    if (isset($config['history']['file']) && $config['history']['file']) {
-
-        //generate uniq file name
-        $filename = strtotime(date('Y-m-d h:i:s')) + rand();
-
-        // force it, if history path is empty
-        if (empty($config['history']['path'])) {
-            $config['history']['path'] = 'log';
-        }
-
-        $path = $this->package('global')->path('root') . '/' . $config['history']['path'];
-
-        // we are already expecting a log/ during creation of project
-        // if directory is writable
-        if (!is_writable($path)) {
-            chmod($path, 0777); // make it writable
-        }
-
-        // get request and response as content
-        $content = [
-            'request' => $request->get(),
-            'response' => $response->get(),
-        ];
-
-        // as the name says, put contents in a file
-        file_put_contents(
-            $filename . '.json',
-            json_encode($content)
-        );
-
-        // sample expected: 1234567890.json
-        $completeFilename = sprintf('%s.json', $filename);
+    //if no log path, then make one
+    if (!trim($logPath)) {
+        $logPath = 'log';
     }
 
+    //case for relative like /some/absolute vs absolute
+    if (strpos($logPath, '/') !== 0) {
+        $logPath = $this->package('global')->path('root') . '/';
+    }
+
+    //generate uniq file name
+    $filename = sprintf('%s/%s.json', $logPath, md5(uniqid()));
+
+    // // -> /
+    $filename = str_replace('//', '/', $filename);
+
+    // we are already expecting a log/ during creation of project
+    // if directory is writable
+    if (!is_writable(dirname($filename))) {
+        chmod(dirname($filename), 0777); // make it writable
+    }
+
+    // as the name says, put contents in a file
+    file_put_contents($filename, json_encode([
+        'request' => $request->get(),
+        'response' => $response->get(),
+    ]));
+
     //record logs
-    $logRequest->setStage('history_meta', $completeFilename);
+    $logRequest->setStage('history_meta', basename($filename));
     $this->trigger('history-create', $logRequest, $logResponse);
 });
 
@@ -107,4 +102,3 @@ $this->package('cradlephp/cradle-history')->addMethod('template', function (
     //render
     return cradle('global')->template($file, $data, $paths);
 });
-
