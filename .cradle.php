@@ -43,20 +43,20 @@ $this->addLogger(function($message, $request, $response) {
     // // -> /
     $filename = str_replace('//', '/', $filename);
 
-    // we are already expecting a log/ during creation of project
-    // if directory is writable
-    if (!is_writable(dirname($filename))) {
-        chmod(dirname($filename), 0777); // make it writable
+    //if its not a directory
+    if (!is_dir(dirname($filename))
+        && is_writable(dirname($filename))
+    ) {
+        // as the name says, put contents in a file
+        file_put_contents($filename, json_encode([
+            'request' => $request->get(),
+            'response' => $response->get(),
+        ]));
+
+        //record logs
+        $logRequest->setStage('history_path', basename($filename));
     }
 
-    // as the name says, put contents in a file
-    file_put_contents($filename, json_encode([
-        'request' => $request->get(),
-        'response' => $response->get(),
-    ]));
-
-    //record logs
-    $logRequest->setStage('history_path', basename($filename));
     $this->trigger('history-create', $logRequest, $logResponse);
 });
 
