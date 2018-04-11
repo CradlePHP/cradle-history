@@ -10,8 +10,6 @@ require_once __DIR__ . '/package/helpers.php';
 use Cradle\Http\Request;
 use Cradle\Http\Response;
 
-
-
 $this->addLogger(function($message, $request, $response) {
     $logRequest = Request::i()->load();
     $logResponse = Response::i()->load();
@@ -25,28 +23,31 @@ $this->addLogger(function($message, $request, $response) {
         ->setStage('history_flag', 0);
 
     //try to get the log path from settings
-    $logPath = $this->package('global')->config('setting', 'log');
+    $logPath = $this->package('global')->config('settings', 'log_path');
 
-    //if no log path, then make one
-    if (!trim($logPath)) {
-        $logPath = 'log';
-    }
-
-    //case for relative like /some/absolute vs absolute
-    if (strpos($logPath, '/') !== 0) {
-        $logPath = $this->package('global')->path('root') . '/' . $logPath;
+    // if log path is not set
+    if (!$logPath) {
+        // set default log path
+        $logPath = $this->package('global')->path('root') . '/log';
+    } else {
+        // if relative path
+        if (strpos($logPath, '/') !== 0) {
+            // set absolute path
+            $logPath = $this->package('global')->path('root') . '/' . $logPath;
+        }
     }
 
     //generate uniq file name
     $filename = sprintf('%s/%s.json', $logPath, md5(uniqid()));
 
-    // // -> /
-    $filename = str_replace('//', '/', $filename);
-
     //if its not a directory
-    if (!is_dir(dirname($filename))
-        && is_writable(dirname($filename))
-    ) {
+    if (!is_dir(dirname($filename))) {
+        // create directory
+        mkdir(dirname($filename), 0777);
+    }
+
+    //if directory is writable
+    if (is_writable(dirname($filename))) {
         // as the name says, put contents in a file
         file_put_contents($filename, json_encode([
             'request' => $request->get(),
@@ -55,7 +56,7 @@ $this->addLogger(function($message, $request, $response) {
 
         //record logs
         $logRequest->setStage('history_path', basename($filename));
-    }
+    }    
 
     $this->trigger('history-create', $logRequest, $logResponse);
 });

@@ -140,6 +140,9 @@ $this->get('/admin/history/search', function ($request, $response) {
 $this->get('/admin/history/detail/:history_id', function ($request, $response) {
     //----------------------------//
     // 1. Prepare Data
+    // get the settings
+    $config = $this->package('global')->config('settings');
+
     //get schema data
     $schema = Schema::i('history');
 
@@ -182,8 +185,41 @@ $this->get('/admin/history/detail/:history_id', function ($request, $response) {
         //pass the item to the template
         $data['item'] = $data['detail'];
 
-        if (is_array($data['item']['history_meta'])) {
-            $data['item']['history_meta'] = json_encode($data['item']['history_meta'], JSON_PRETTY_PRINT);
+        // default log path
+        $logPath = 'log';
+
+        // if log path is set
+        if (isset($config['log_path'])) {
+            $logPath = $config['log_path'];
+        }
+
+        // case for relative path
+        if (strpos($logPath, '/') !== 0) {
+            $logPath = $this->package('global')->path('root') . '/' . $logPath;
+        }
+
+        // if history path is set
+        if (isset($data['item']['history_path'])) {
+            // get the history log file
+            $logPath = $logPath . '/' . $data['item']['history_path'];
+
+            // default meta content
+            $meta = null;
+
+            // try parsing
+            try {
+                // read the file
+                $meta = @file_get_contents($logPath);
+                // encode/decode to format
+                $meta = json_encode(json_decode($meta), JSON_PRETTY_PRINT);
+            } catch(\Exception $e) {}
+
+            if (!$meta || $meta == 'null') {
+                $meta = 'Data is Empty';
+            }
+
+            // set history meta
+            $data['item']['history_meta'] = $meta;
         }
 
         //add suggestion value for each relation
