@@ -10,7 +10,12 @@ require_once __DIR__ . '/package/helpers.php';
 use Cradle\Http\Request;
 use Cradle\Http\Response;
 
-$this->addLogger(function($message, $request, $response) {
+$this->addLogger(function($message, $request = null, $response = null) {
+    if (!$request) {
+        echo $message . PHP_EOL;
+        return;
+    }
+    
     $logRequest = Request::i()->load();
     $logResponse = Response::i()->load();
 
@@ -56,7 +61,7 @@ $this->addLogger(function($message, $request, $response) {
 
         //record logs
         $logRequest->setStage('history_path', basename($filename));
-    }    
+    }
 
     $this->trigger('history-create', $logRequest, $logResponse);
 });
