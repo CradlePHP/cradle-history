@@ -9,15 +9,38 @@ require_once __DIR__ . '/package/helpers.php';
 
 use Cradle\Http\Request;
 use Cradle\Http\Response;
+use Cradle\Package\System\Schema;
 
 $this->addLogger(function($message, $request = null, $response = null) {
     if (!$request) {
         echo $message . PHP_EOL;
         return;
     }
-    
+
     $logRequest = Request::i()->load();
     $logResponse = Response::i()->load();
+
+    switch (true) {
+        case strpos($message, 'created') !== FALSE:
+            $type = 'create';
+            break;
+
+        case strpos($message, 'updated') !== FALSE:
+            $type = 'update';
+            break;
+
+        case strpos($message, 'restored') !== FALSE:
+            $type = 'restore';
+            break;
+
+        case strpos($message, 'removed') !== FALSE:
+            $type = 'remove';
+            break;
+
+        default:
+            $type =  null;
+            break;
+    }
 
     //record logs
     $logRequest
@@ -25,6 +48,7 @@ $this->addLogger(function($message, $request = null, $response = null) {
         ->setStage('profile_id', $request->getSession('me', 'profile_id'))
         ->setStage('history_page', $request->getServer('REQUEST_URI'))
         ->setStage('history_activity', $message)
+        ->setStage('history_type', $type)
         ->setStage('history_flag', 0);
 
     //try to get the log path from settings
@@ -64,6 +88,42 @@ $this->addLogger(function($message, $request = null, $response = null) {
     }
 
     $this->trigger('history-create', $logRequest, $logResponse);
+    $activity = $this
+        ->package('global')
+        ->config('packages', 'cradlephp/cradle-activity');
+
+    // if there's an activity package
+    // and the package is active
+    // and there's a schema involved
+    // and schema's primary id was given
+    // then we create an attached activity for it
+    if ($activity
+        && $activity['active']
+        && $request->getStage('schema')
+        && $response->getResults(
+            Schema::i($request
+                ->getStage('schema'))
+                ->getPrimaryFieldName()
+            )
+    ) {
+        $activityRequest = Request::i()->load();
+        $activityResponse = Response::i()->load();
+
+        $results = $logResponse->getResults();
+
+        $activityRequest->setStage('history_id', $results['history_id']);
+        $activityRequest->setStage('activity_schema', $request->getStage('schema'));
+        $activityRequest->setStage(
+            'activity_schema_primary',
+            $response->getResults(
+            Schema::i($request
+                ->getStage('schema'))
+                ->getPrimaryFieldName()
+            )
+        );
+
+        $this->trigger('activity-create', $activityRequest, $activityResponse);
+    }
 });
 
 /**
