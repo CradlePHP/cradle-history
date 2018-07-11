@@ -48,8 +48,7 @@ $this->addLogger(function($message, $request = null, $response = null) {
         ->setStage('profile_id', $request->getSession('me', 'profile_id'))
         ->setStage('history_page', $request->getServer('REQUEST_URI'))
         ->setStage('history_activity', $message)
-        ->setStage('history_type', $type)
-        ->setStage('history_flag', 0);
+        ->setStage('history_type', $type);
 
     //try to get the log path from settings
     $logPath = $this->package('global')->config('settings', 'log_path');
@@ -88,6 +87,7 @@ $this->addLogger(function($message, $request = null, $response = null) {
     }
 
     $this->trigger('history-create', $logRequest, $logResponse);
+
     $activity = $this
         ->package('global')
         ->config('packages', 'cradlephp/cradle-activity');
@@ -132,10 +132,22 @@ $this->addLogger(function($message, $request = null, $response = null) {
 $this->package('cradlephp/cradle-history')->addMethod('template', function (
     $file,
     array $data = [],
-    $partials = []
+    $partials = [],
+    $customFileRoot  = null,
+    $customPartialsRoot = null
 ) {
     // get the root directory
-    $root =  sprintf('%s/src/template/', __DIR__);
+    $root =  $customFileRoot;
+    $partialRoot = $customPartialsRoot;
+    $originalRoot =  sprintf('%s/src/template/', __DIR__);
+
+    if (!$customFileRoot) {
+        $root = $originalRoot;
+    }
+
+    if (!$customPartialRoot) {
+        $partialRoot = $originalRoot;
+    }
 
     // check for partials
     if (!is_array($partials)) {
@@ -160,7 +172,7 @@ $this->package('cradlephp/cradle-history')->addMethod('template', function (
             $path = '_' . $path;
         }
 
-        $paths[$partial] = $root . $path;
+        $paths[$partial] = $partialRoot . $path;
     }
 
     $file = $root . $file . '.html';

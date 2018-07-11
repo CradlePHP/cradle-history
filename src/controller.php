@@ -107,14 +107,20 @@ $this->get('/admin/history/search', function ($request, $response) {
     //render the body
     $body = $this
         ->package('cradlephp/cradle-history')
-        ->template('search', $data, [
-            'search_head',
-            'search_form',
-            'search_filters',
-            'search_actions',
-            'search_row_format',
-            'search_row_actions'
-        ]);
+        ->template(
+            'search',
+            $data,
+            [
+                'search_head',
+                'search_form',
+                'search_filters',
+                'search_actions',
+                'search_row_format',
+                'search_row_actions'
+            ],
+            $response->getPage('template_root'),
+            $response->getPage('partials_root')
+        );
 
     //set content
     $response
@@ -126,7 +132,7 @@ $this->get('/admin/history/search', function ($request, $response) {
     if ($request->getStage('render') === 'body') {
         return;
     }
-    
+
     //render page
     $this->trigger('admin-render-page', $request, $response);
 });
@@ -290,10 +296,16 @@ $this->get('/admin/history/detail/:history_id', function ($request, $response) {
     //render the body
     $body = $this
         ->package('cradlephp/cradle-history')
-        ->template('detail', $data, [
-            'detail_detail',
-            'detail_format'
-        ]);
+        ->template(
+            'detail',
+            $data,
+            [
+                'detail_detail',
+                'detail_format'
+            ],
+            $response->getPage('template_root'),
+            $response->getPage('partials_root')
+        );
 
     //set content
     $response
