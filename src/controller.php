@@ -82,7 +82,9 @@ $this->get('/admin/history/search', function ($request, $response) {
         }
 
         //reindex filterable
-        $data['schema']['filterable'] = array_values($data['schema']['filterable']);
+        $data['schema']['filterable'] = array_values(
+            $data['schema']['filterable']
+        );
     }
 
     $data['filterable_relations'] = [];
@@ -104,9 +106,19 @@ $this->get('/admin/history/search', function ($request, $response) {
     //set the class name
     $class = 'page-admin-history-search page-admin';
 
+    $template = __DIR__ . '/template';
+    if (is_dir($response->getPage('template_root'))) {
+        $template = $response->getPage('template_root');
+    }
+
+    $partials = __DIR__ . '/template';
+    if (is_dir($response->getPage('partials_root'))) {
+        $partials = $response->getPage('partials_root');
+    }
+
     //render the body
     $body = $this
-        ->package('cradlephp/cradle-history')
+        ->package('cradlephp/cradle-system')
         ->template(
             'search',
             $data,
@@ -118,8 +130,8 @@ $this->get('/admin/history/search', function ($request, $response) {
                 'search_row_format',
                 'search_row_actions'
             ],
-            $response->getPage('template_root'),
-            $response->getPage('partials_root')
+            $template,
+            $partials
         );
 
     //set content
@@ -291,11 +303,24 @@ $this->get('/admin/history/detail/:history_id', function ($request, $response) {
     $class = 'page-admin-history-detail page-admin';
 
     //determine the title
-    $data['title'] = $this->package('global')->translate('Viewing history #%s', $request->getStage('history_id'));
+    $data['title'] = $this->package('global')->translate(
+        'Viewing history #%s',
+        $request->getStage('history_id')
+    );
+
+    $template = __DIR__ . '/template';
+    if (is_dir($response->getPage('template_root'))) {
+        $template = $response->getPage('template_root');
+    }
+
+    $partials = __DIR__ . '/template';
+    if (is_dir($response->getPage('partials_root'))) {
+        $partials = $response->getPage('partials_root');
+    }
 
     //render the body
     $body = $this
-        ->package('cradlephp/cradle-history')
+        ->package('cradlephp/cradle-system')
         ->template(
             'detail',
             $data,
@@ -303,8 +328,8 @@ $this->get('/admin/history/detail/:history_id', function ($request, $response) {
                 'detail_detail',
                 'detail_format'
             ],
-            $response->getPage('template_root'),
-            $response->getPage('partials_root')
+            $template,
+            $partials
         );
 
     //set content
@@ -441,5 +466,3 @@ $cradle->get('/admin/history/:action/logs', function ($request, $response) {
         'results' => $results
     ]));
 });
-
-// Front End Controllers

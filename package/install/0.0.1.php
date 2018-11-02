@@ -1,12 +1,8 @@
 <?php //-->
 
-use Cradle\Http\Request;
-use Cradle\Http\Response;
-
 cradle(function() {
     //setup a new RnR
-    $request = Request::i()->load();
-    $response = Response::i()->load();
+    $payload = $this->makePayload();
 
     //setup result counters
     $errors = [];
@@ -30,42 +26,46 @@ cradle(function() {
         }
 
         //set the data
-        $request->setStage($data);
+        $payload['request']->setStage($data);
 
         //----------------------------//
         // 1. Prepare Data
         //if detail has no value make it null
-        if ($request->hasStage('detail')
-            && !$request->getStage('detail')
+        if ($payload['request']->hasStage('detail')
+            && !$payload['request']->getStage('detail')
         ) {
-            $request->setStage('detail', null);
+            $payload['request']->setStage('detail', null);
         }
 
         //if fields has no value make it an array
-        if ($request->hasStage('fields')
-            && !$request->getStage('fields')
+        if ($payload['request']->hasStage('fields')
+            && !$payload['request']->getStage('fields')
         ) {
-            $request->setStage('fields', []);
+            $payload['request']->setStage('fields', []);
         }
 
         //if validation has no value make it an array
-        if ($request->hasStage('validation')
-            && !$request->getStage('validation')
+        if ($payload['request']->hasStage('validation')
+            && !$payload['request']->getStage('validation')
         ) {
-            $request->setStage('validation', []);
+            $payload['request']->setStage('validation', []);
         }
 
         //----------------------------//
         // 2. Process Request
         //now trigger
-        $this->trigger('system-schema-create', $request, $response);
+        $this->trigger(
+            'system-schema-create',
+            $payload['request'],
+            $payload['response']
+        );
 
         //----------------------------//
         // 3. Interpret Results
         //if the event returned an error
-        if ($response->isError()) {
+        if ($payload['response']->isError()) {
             //collect all the errors
-            $errors[$data['name']] = $response->getValidation();
+            $errors[$data['name']] = $payload['response']->getValidation();
             continue;
         }
 

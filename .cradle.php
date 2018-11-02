@@ -17,8 +17,7 @@ $this->addLogger(function($message, $request = null, $response = null) {
         return;
     }
 
-    $logRequest = Request::i()->load();
-    $logResponse = Response::i()->load();
+    $payload = $this->makePayload();
 
     switch (true) {
         case strpos($message, 'created') !== FALSE:
@@ -43,7 +42,7 @@ $this->addLogger(function($message, $request = null, $response = null) {
     }
 
     //record logs
-    $logRequest
+    $payload['request']
         ->setStage('history_remote_address', $request->getServer('REMOTE_ADDR'))
         ->setStage('profile_id', $request->getSession('me', 'profile_id'))
         ->setStage('history_page', $request->getServer('REQUEST_URI'))
@@ -83,10 +82,14 @@ $this->addLogger(function($message, $request = null, $response = null) {
         ]));
 
         //record logs
-        $logRequest->setStage('history_path', basename($filename));
+        $payload['request']->setStage('history_path', basename($filename));
     }
 
-    $this->trigger('history-create', $logRequest, $logResponse);
+    $this->trigger(
+        'history-create',
+        $payload['request'],
+        $payload['response']
+    );
 
     $activity = $this
         ->package('global')
@@ -106,14 +109,21 @@ $this->addLogger(function($message, $request = null, $response = null) {
                 ->getPrimaryFieldName()
             )
     ) {
-        $activityRequest = Request::i()->load();
-        $activityResponse = Response::i()->load();
+        $payload = $this->makePayload();
 
-        $results = $logResponse->getResults();
+        $results = $payload['response']->getResults();
 
-        $activityRequest->setStage('history_id', $results['history_id']);
-        $activityRequest->setStage('activity_schema', $request->getStage('schema'));
-        $activityRequest->setStage(
+        $payload['request']->setStage(
+            'history_id',
+            $results['history_id']
+        );
+
+        $payload['request']->setStage(
+            'activity_schema',
+            $request->getStage('schema')
+        );
+
+        $payload['request']->setStage(
             'activity_schema_primary',
             $response->getResults(
             Schema::i($request
@@ -122,61 +132,10 @@ $this->addLogger(function($message, $request = null, $response = null) {
             )
         );
 
-        $this->trigger('activity-create', $activityRequest, $activityResponse);
+        $this->trigger(
+            'activity-create',
+            $payload['request'],
+            $payload['response']
+        );
     }
-});
-
-/**
- * Add Template Builder
- */
-$this->package('cradlephp/cradle-history')->addMethod('template', function (
-    $file,
-    array $data = [],
-    $partials = [],
-    $customFileRoot  = null,
-    $customPartialsRoot = null
-) {
-    // get the root directory
-    $root =  $customFileRoot;
-    $partialRoot = $customPartialsRoot;
-    $originalRoot =  sprintf('%s/src/template/', __DIR__);
-
-    if (!$customFileRoot) {
-        $root = $originalRoot;
-    }
-
-    if (!$customPartialRoot) {
-        $partialRoot = $originalRoot;
-    }
-
-    // check for partials
-    if (!is_array($partials)) {
-        $partials = [$partials];
-    }
-
-    $paths = [];
-
-    foreach ($partials as $partial) {
-        //Sample: product_comment => product/_comment
-        //Sample: flash => _flash
-        $path = str_replace('_', '/', $partial);
-        $last = strrpos($path, '/');
-
-        if($last !== false) {
-            $path = substr_replace($path, '/_', $last, 1);
-        }
-
-        $path = $path . '.html';
-
-        if (strpos($path, '_') === false) {
-            $path = '_' . $path;
-        }
-
-        $paths[$partial] = $partialRoot . $path;
-    }
-
-    $file = $root . $file . '.html';
-
-    //render
-    return cradle('global')->template($file, $data, $paths);
 });

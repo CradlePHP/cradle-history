@@ -6,9 +6,6 @@
 use Cradle\Package\System\Schema;
 use Cradle\Package\System\Exception;
 
-use Cradle\Http\Request;
-use Cradle\Http\Response;
-
 /**
  * Creates a history
  *
@@ -121,17 +118,20 @@ $this->on('history-mark-as-read', function ($request, $response) {
     $payload = [];
 
     //update request and response
-    $updateRequest = Request::i()->load();
-    $updateResponse = Response::i()->load();
+    $payload = $this->makePayload();
 
     foreach ($logs['rows'] as $key => $log) {
         $payload[$primary] = $log[$primary];
         $payload['history_flag'] = 1;
-        
-        $updateRequest->setStage($payload);
-        $this->trigger('history-update', $updateRequest, $updateResponse);
 
-        $results[] = $updateResponse->getResults();
+        $payload['request']->setStage($payload);
+        $this->trigger(
+            'history-update',
+            $payload['request'],
+            $payload['response']
+        );
+
+        $results[] = $payload['response']->getResults();
     }
 
     $response->setError(false)->setResults($results);
