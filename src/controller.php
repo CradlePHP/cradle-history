@@ -24,6 +24,10 @@ $this->get('/admin/history/search', function ($request, $response) {
         $response->setFlash($response->getMessage(), 'error');
     }
 
+    $request
+        ->setStage('schema', 'history')
+        ->setStage('order', 'history_created', 'DESC');
+
     //set a default range
     if (!$request->hasStage('range')) {
         $request->setStage('range', 50);
@@ -51,7 +55,7 @@ $this->get('/admin/history/search', function ($request, $response) {
     }
 
     //trigger job
-    $this->trigger('history-search', $request, $response);
+    $this->trigger('system-model-search', $request, $response);
 
     //if we only want the raw data
     if ($request->getStage('render') === 'false') {
@@ -150,38 +154,17 @@ $this->get('/admin/history/search', function ($request, $response) {
 });
 
 /**
- * Render the System Model Update Page
+ * Render the History Raw Data Page
  *
  * @param Request $request
  * @param Response $response
  */
-$this->get('/admin/history/detail/:history_id', function ($request, $response) {
-    //----------------------------//
-    // 1. Prepare Data
-    // get the settings
-    $config = $this->package('global')->config('settings');
+$this->get('/admin/history/json/:history_id', function ($request, $response) {
+    //get the logs
+    $request->setStage('schema', 'history');
+    $this->trigger('system-model-detail', $request, $response);
 
-    //get schema data
-    $schema = Schema::i('history');
-
-    //pass the item with only the post data
-    $data = ['item' => $request->getPost()];
-
-    //also pass the schema to the template
-    $data['schema'] = $schema->getAll();
-
-    //if this is a return back from processing
-    //this form and it's because of an error
-    if ($response->isError()) {
-        //pass the error messages to the template
-        $response->setFlash($response->getMessage(), 'error');
-        $data['errors'] = $response->getValidation();
-    }
-
-    //get the original table row
-    $this->trigger('history-detail', $request, $response);
-
-    //can we update ?
+    // if errors
     if ($response->isError()) {
         //redirect
         $redirect = '/admin/history/search';
@@ -191,82 +174,14 @@ $this->get('/admin/history/detail/:history_id', function ($request, $response) {
             $redirect = $request->getStage('redirect_uri');
         }
 
+        //if no redirect
+        if ($redirect === 'false') {
+            return;
+        }
+
         //add a flash
         $this->package('global')->flash($response->getMessage(), 'error');
         return $this->package('global')->redirect($redirect);
-    }
-
-    $data['detail'] = $response->getResults();
-
-    //if no item
-    if (empty($data['item'])) {
-        //pass the item to the template
-        $data['item'] = $data['detail'];
-
-        // default log path
-        $logPath = 'log';
-
-        // if log path is set
-        if (isset($config['log_path'])) {
-            $logPath = $config['log_path'];
-        }
-
-        // case for relative path
-        if (strpos($logPath, '/') !== 0) {
-            $logPath = $this->package('global')->path('root') . '/' . $logPath;
-        }
-
-        // if history path is set
-        if (isset($data['item']['history_path'])) {
-            // get the history log file
-            $logPath = $logPath . '/' . $data['item']['history_path'];
-
-            // default meta content
-            $meta = null;
-
-            // try parsing
-            try {
-                // read the file
-                $meta = @file_get_contents($logPath);
-                // encode/decode to format
-                $meta = json_encode(json_decode($meta), JSON_PRETTY_PRINT);
-            } catch(\Exception $e) {}
-
-            if (!$meta || $meta == 'null') {
-                $meta = 'Data is Empty';
-            }
-
-            // set history meta
-            $data['item']['history_meta'] = $meta;
-        }
-
-        //add suggestion value for each relation
-        foreach ($data['schema']['relations'] as $name => $relation) {
-            if ($relation['many'] > 1) {
-                continue;
-            }
-
-            $suggestion = '_' . $relation['primary2'];
-
-            $suggestionData = $data['item'];
-            if ($relation['many'] == 0) {
-                if (!isset($data['item'][$relation['name']])) {
-                    continue;
-                }
-
-                $suggestionData = $data['item'][$relation['name']];
-
-                if (!$suggestionData) {
-                    continue;
-                }
-            }
-
-            try {
-                $data['item'][$suggestion] = Schema::i($relation['name'])
-                    ->getSuggestionFormat($suggestionData);
-            } catch (Exception $e) {
-            }
-        }
     }
 
     //if we only want the raw data
@@ -274,28 +189,17 @@ $this->get('/admin/history/detail/:history_id', function ($request, $response) {
         return;
     }
 
-    //determine the suggestion
-    $data['detail']['suggestion'] = $schema->getSuggestionFormat($data['item']);
+    $data['detail'] = $response->getResults();
 
-    //add CSRF
-    $this->trigger('csrf-load', $request, $response);
-    $data['csrf'] = $response->getResults('csrf');
+    //get schema data
+    $schema = Schema::i('history');
+    //also pass the schema to the template
+    $data['schema'] = $schema->getAll();
 
-    //if there are file fields
-    if (!empty($data['schema']['files'])) {
-        //add CDN
-        $config = $this->package('global')->service('s3-main');
-        $data['cdn_config'] = File::getS3Client($config);
+    //if we only want the raw data
+    if ($request->getStage('render') === 'false') {
+        return;
     }
-
-    //determine valid relations
-    $data['valid_relations'] = [];
-    $this->trigger('system-schema-search', $request, $response);
-    foreach ($response->getResults('rows') as $relation) {
-        $data['valid_relations'][] = $relation['name'];
-    }
-
-    $data['redirect'] = urlencode($request->getServer('REQUEST_URI'));
 
     //----------------------------//
     // 2. Render Template
@@ -304,7 +208,7 @@ $this->get('/admin/history/detail/:history_id', function ($request, $response) {
 
     //determine the title
     $data['title'] = $this->package('global')->translate(
-        'Viewing history #%s',
+        'Viewing Raw Log for #%s',
         $request->getStage('history_id')
     );
 
@@ -322,11 +226,186 @@ $this->get('/admin/history/detail/:history_id', function ($request, $response) {
     $body = $this
         ->package('cradlephp/cradle-system')
         ->template(
-            'detail',
+            'code',
+            $data,
+            [],
+            $template,
+            $partials
+        );
+
+    //set content
+    $response
+        ->setPage('title', $data['title'])
+        ->setPage('class', $class)
+        ->setContent($body);
+
+    //if we only want the body
+    if ($request->getStage('render') === 'body') {
+        return;
+    }
+
+    //render page
+    $this->trigger('admin-render-page', $request, $response);
+});
+
+/**
+ * Render the History Model Changes Page
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$this->get('/admin/history/changes/:history_id', function ($request, $response) {
+    //redirect
+    $redirect = '/admin/history/search';
+
+    //this is for flexibility
+    if ($request->hasStage('redirect_uri')) {
+        $redirect = $request->getStage('redirect_uri');
+    }
+
+    $request->setStage('redirect_uri', 'false');
+
+    $route = sprintf(
+        '/admin/history/model/changes/%s',
+        $request->getStage('history_id')
+    );
+
+    $this->routeTo('get', $route, $request, $response);
+
+    if (!$response->isError()) {
+        return;
+    }
+
+    $route = sprintf(
+        '/admin/history/schema/changes/%s',
+        $request->getStage('history_id')
+    );
+
+    $this->routeTo('get', $route, $request, $response);
+
+    if (!$response->isError()) {
+        return;
+    }
+
+    //if no redirect
+    if ($redirect === 'false') {
+        return;
+    }
+
+    //add a flash
+    $this->package('global')->flash($response->getMessage(), 'error');
+    return $this->package('global')->redirect($redirect);
+});
+
+/**
+ * Render the History Model Changes Page
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$this->get('/admin/history/changes/:history_table_name/:history_table_id', function ($request, $response) {
+    $id = $request->getStage('history_table_id');
+    $table = $request->getStage('history_table_name');
+
+    $request
+        ->setStage('schema', 'history')
+        ->setStage('filter', 'history_table_id', $id)
+        ->setStage('filter', 'history_table_name', $table)
+        ->setStage('range', 0)
+        ->setStage('order', 'history_created', 'DESC');
+
+    $this->trigger('system-model-search', $request, $response);
+
+    $rows = $response->getResults('rows');
+
+    $revisions = [];
+
+    foreach($rows as $row) {
+        //make a new RnR
+        $payload = $this->makePayload();
+
+        //make sure we get this back
+        $payload['request']
+            ->setStage('render', 'false')
+            ->setStage('redirect_uri', 'false');
+
+        $route = sprintf(
+            '/admin/history/changes/%s',
+            $row['history_id']
+        );
+
+        $this->routeTo('get', $route, $payload['request'], $payload['response']);
+
+        // if errors
+        if ($response->isError()) {
+            //just add an entry
+            $revisions[]['detail'] = $row;
+            continue;
+        }
+
+        if (!$payload['response']->hasResults('history')) {
+            //just add an entry
+            $revisions[]['detail'] = $row;
+            continue;
+        }
+
+        $revisions[] = [
+            'detail' => $payload['response']->getResults('history'),
+            'item' => [
+                'noop' => [],
+                'schema' => $payload['response']->getResults('schema'),
+                'current' => $payload['response']->getResults('current'),
+                'original' => $payload['response']->getResults('original')
+            ],
+        ];
+    }
+
+    $data['id'] = $id;
+    $data['table'] = $table;
+
+    //if we only want the raw data
+    if ($request->getStage('render') === 'false') {
+        return $response->setResults('rows', $revisions);
+    }
+
+    $data['revisions'] = $revisions;
+
+    //also pass the schema to the template
+    $data['schema'] = Schema::i('history')->getAll();
+
+    //----------------------------//
+    // 2. Render Template
+    //set the class name
+    $class = 'page-admin-history-detail page-admin';
+
+    //determine the title
+    $data['title'] = $this->package('global')->translate(
+        'Viewing Revisions for %s #%s',
+        $table,
+        $id
+    );
+
+    $template = __DIR__ . '/template';
+    if (is_dir($response->getPage('template_root'))) {
+        $template = $response->getPage('template_root');
+    }
+
+    $partials = __DIR__ . '/template';
+    if (is_dir($response->getPage('partials_root'))) {
+        $partials = $response->getPage('partials_root');
+    }
+
+    //render the body
+    $body = $this
+        ->package('cradlephp/cradle-system')
+        ->template(
+            'revisions',
             $data,
             [
-                'detail_detail',
-                'detail_format'
+                'change_model',
+                'change_value',
+                'change_schema',
+                'change_revisions'
             ],
             $template,
             $partials
@@ -345,6 +424,500 @@ $this->get('/admin/history/detail/:history_id', function ($request, $response) {
 
     //render page
     $this->trigger('admin-render-page', $request, $response);
+});
+
+/**
+ * Redirect to the Item Page
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$this->get('/admin/history/redirect/:history_id', function ($request, $response) {
+    //redirect
+    $redirect = '/admin/history/search';
+
+    //this is for flexibility
+    if ($request->hasStage('redirect_uri')) {
+        $redirect = $request->getStage('redirect_uri');
+    }
+
+    $request->setStage('redirect_uri', 'false');
+
+    $route = sprintf(
+        '/admin/history/model/redirect/%s',
+        $request->getStage('history_id')
+    );
+
+    $this->routeTo('get', $route, $request, $response);
+
+    if (!$response->isError()) {
+        return;
+    }
+
+    $route = sprintf(
+        '/admin/history/schema/redirect/%s',
+        $request->getStage('history_id')
+    );
+
+    $this->routeTo('get', $route, $request, $response);
+
+    if (!$response->isError()) {
+        return;
+    }
+
+    //if no redirect
+    if ($redirect === 'false') {
+        return;
+    }
+
+    //add a flash
+    $this->package('global')->flash($response->getMessage(), 'error');
+    return $this->package('global')->redirect($redirect);
+});
+
+/**
+ * Render the History Model Changes Page
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$this->get('/admin/history/model/changes/:history_id', function ($request, $response) {
+    //get the versions
+    $this->trigger('history-model-versions', $request, $response);
+
+    // if errors
+    if ($response->isError()) {
+        //redirect
+        $redirect = '/admin/history/search';
+
+        //this is for flexibility
+        if ($request->hasStage('redirect_uri')) {
+            $redirect = $request->getStage('redirect_uri');
+        }
+
+        //if no redirect
+        if ($redirect === 'false') {
+            return;
+        }
+
+        //add a flash
+        $this->package('global')->flash($response->getMessage(), 'error');
+        return $this->package('global')->redirect($redirect);
+    }
+
+    //if we only want the raw data
+    if ($request->getStage('render') === 'false') {
+        return;
+    }
+
+    $data['detail'] = $response->getResults('history');
+    $data['item']['schema'] = $response->getResults('schema');
+    $data['item']['current'] = $response->getResults('current');
+    $data['item']['original'] = $response->getResults('original');
+
+    //add a noop
+    $data['item']['noop'] = [];
+
+    //also pass the schema to the template
+    $data['schema'] = Schema::i('history')->getAll();
+
+    //----------------------------//
+    // 2. Render Template
+    //set the class name
+    $class = 'page-admin-history-detail page-admin';
+
+    //determine the title
+    $data['title'] = $this->package('global')->translate(
+        'Viewing Changes for #%s',
+        $request->getStage('history_id')
+    );
+
+    $template = __DIR__ . '/template';
+    if (is_dir($response->getPage('template_root'))) {
+        $template = $response->getPage('template_root');
+    }
+
+    $partials = __DIR__ . '/template';
+    if (is_dir($response->getPage('partials_root'))) {
+        $partials = $response->getPage('partials_root');
+    }
+
+    //render the body
+    $body = $this
+        ->package('cradlephp/cradle-system')
+        ->template(
+            'change/model',
+            $data,
+            [
+                'change_value',
+                'change_model'
+            ],
+            $template,
+            $partials
+        );
+
+    //set content
+    $response
+        ->setPage('title', $data['title'])
+        ->setPage('class', $class)
+        ->setContent($body);
+
+    //if we only want the body
+    if ($request->getStage('render') === 'body') {
+        return;
+    }
+
+    //render page
+    $this->trigger('admin-render-page', $request, $response);
+});
+
+/**
+ * Process the History Model Revert
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$this->get('/admin/history/model/revert/:history_id', function ($request, $response) {
+    //get the versions
+    $this->trigger('history-model-versions', $request, $response);
+
+    //redirect
+    $redirect = '/admin/history/search';
+
+    //this is for flexibility
+    if ($request->hasStage('redirect_uri')) {
+        $redirect = $request->getStage('redirect_uri');
+    }
+
+    // if errors
+    if ($response->isError()) {
+        //if no redirect
+        if ($redirect === 'false') {
+            return;
+        }
+
+        //add a flash
+        $this->package('global')->flash($response->getMessage(), 'error');
+        return $this->package('global')->redirect($redirect);
+    }
+
+    $data['detail'] = $response->getResults('history');
+    $data['item']['schema'] = $response->getResults('schema');
+    $data['item']['current'] = $response->getResults('current');
+    $data['item']['original'] = $response->getResults('original');
+
+    $schema = $response->getResults('schema', 'name');
+    $original = $response->getResults('original');
+
+    //reset the stage
+    $request->setStage($original);
+
+    if ($schema) {
+        $request->setStage('schema', $schema);
+        //now trigger the update
+        $this->trigger('system-model-update', $request, $response);
+    //let's try to do a regular update
+    } else {
+        // but we cannot do a regular update, because theres other things
+        // to consider like how to deal with cache and index, etc...
+        // in summary, it's best that we just trigger an event, incase
+        // anything is listening to this
+        $event = $data['detail']['history_table_name'] . '-update';
+        $this->trigger($event, $request, $response);
+    }
+
+    //if no redirect
+    if ($redirect === 'false') {
+        return;
+    }
+
+    //interpret
+    if ($response->isError()) {
+        //add a flash
+        $this->package('global')->flash($response->getMessage(), 'error');
+    } else {
+        $this->package('global')->flash(sprintf(
+            '%s was successfully reverted',
+            $data['detail']['history_table_name']
+        ), 'success');
+
+        //record logs
+        $this->log(
+            sprintf(
+                'reverted %s #%s',
+                $data['detail']['history_table_name'],
+                $data['detail']['history_table_id']
+            ),
+            $request,
+            $response,
+            'update',
+            $data['detail']['history_table_name'],
+            $data['detail']['history_table_id']
+        );
+    }
+
+    return $this->package('global')->redirect($redirect);
+});
+
+/**
+ * Redirect to the Model Page
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$this->get('/admin/history/model/redirect/:history_id', function ($request, $response) {
+    //----------------------------//
+    // 1. Prepare Data
+    //get the versions
+    $this->trigger('history-model-versions', $request, $response);
+
+    //redirect
+    $redirect = '/admin/history/search';
+
+    //this is for flexibility
+    if ($request->hasStage('redirect_uri')) {
+        $redirect = $request->getStage('redirect_uri');
+    }
+
+    // if errors
+    if ($response->isError()) {
+        //if no redirect
+        if ($redirect === 'false') {
+            return;
+        }
+
+        //add a flash
+        $this->package('global')->flash($response->getMessage(), 'error');
+        return $this->package('global')->redirect($redirect);
+    }
+
+    if (!$response->getResults('schema', 'name')) {
+        //if no redirect
+        if ($redirect === 'false') {
+            return;
+        }
+
+        //add a flash
+        $this->package('global')->flash('Not Found', 'error');
+        return $this->package('global')->redirect($redirect);
+    }
+
+    $primary = $response->getResults('schema', 'primary');
+    $original = $response->getResults('original');
+
+    return $this->package('global')->redirect(sprintf(
+        '/admin/system/model/%s/detail/%s',
+        $response->getResults('schema', 'name'),
+        $original[$primary]
+    ));
+});
+
+/**
+ * Render the History Model Changes Page
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$this->get('/admin/history/schema/changes/:history_id', function ($request, $response) {
+    //get the versions
+    $this->trigger('history-schema-versions', $request, $response);
+
+    // if errors
+    if ($response->isError()) {
+        //redirect
+        $redirect = '/admin/history/search';
+
+        //this is for flexibility
+        if ($request->hasStage('redirect_uri')) {
+            $redirect = $request->getStage('redirect_uri');
+        }
+
+        //if no redirect
+        if ($redirect === 'false') {
+            return;
+        }
+
+        //add a flash
+        $this->package('global')->flash($response->getMessage(), 'error');
+        return $this->package('global')->redirect($redirect);
+    }
+
+    //if we only want the raw data
+    if ($request->getStage('render') === 'false') {
+        return;
+    }
+
+    $data['detail'] = $response->getResults('history');
+    $data['item']['schema'] = $response->getResults('schema');
+    $data['item']['current'] = $response->getResults('current');
+    $data['item']['original'] = $response->getResults('original');
+
+    //also pass the schema to the template
+    $data['schema'] = Schema::i('history')->getAll();
+
+    //----------------------------//
+    // 2. Render Template
+    //set the class name
+    $class = 'page-admin-history-detail page-admin';
+
+    //determine the title
+    $data['title'] = $this->package('global')->translate(
+        'Viewing Changes for #%s',
+        $request->getStage('history_id')
+    );
+
+    $template = __DIR__ . '/template';
+    if (is_dir($response->getPage('template_root'))) {
+        $template = $response->getPage('template_root');
+    }
+
+    $partials = __DIR__ . '/template';
+    if (is_dir($response->getPage('partials_root'))) {
+        $partials = $response->getPage('partials_root');
+    }
+
+    //render the body
+    $body = $this
+        ->package('cradlephp/cradle-system')
+        ->template(
+            'change/schema',
+            $data,
+            [
+                'change_schema'
+            ],
+            $template,
+            $partials
+        );
+
+    //set content
+    $response
+        ->setPage('title', $data['title'])
+        ->setPage('class', $class)
+        ->setContent($body);
+
+    //if we only want the body
+    if ($request->getStage('render') === 'body') {
+        return;
+    }
+
+    //render page
+    $this->trigger('admin-render-page', $request, $response);
+});
+
+/**
+ * Process the History Schema Revert
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$this->get('/admin/history/schema/revert/:history_id', function ($request, $response) {
+    //get the versions
+    $this->trigger('history-schema-versions', $request, $response);
+
+    //redirect
+    $redirect = '/admin/history/search';
+
+    //this is for flexibility
+    if ($request->hasStage('redirect_uri')) {
+        $redirect = $request->getStage('redirect_uri');
+    }
+
+    // if errors
+    if ($response->isError()) {
+        //if no redirect
+        if ($redirect === 'false') {
+            return;
+        }
+
+        //add a flash
+        $this->package('global')->flash($response->getMessage(), 'error');
+        return $this->package('global')->redirect($redirect);
+    }
+
+    $data['detail'] = $response->getResults('history');
+    $data['item']['schema'] = $response->getResults('schema');
+    $data['item']['current'] = $response->getResults('current');
+    $data['item']['original'] = $response->getResults('original');
+
+    $schema = $response->getResults('schema', 'name');
+    $original = $response->getResults('original');
+
+    //reset the stage
+    $request->setStage($original);
+    $request->setStage('schema', $schema);
+
+    //now trigger the update
+    $this->trigger('system-schema-update', $request, $response);
+
+    //if no redirect
+    if ($redirect === 'false') {
+        return;
+    }
+
+    //interpret
+    if ($response->isError()) {
+        //add a flash
+        $this->package('global')->flash($response->getMessage(), 'error');
+    } else {
+        $this->package('global')->flash(sprintf(
+            '%s was successfully reverted',
+            $data['item']['schema']['singular']
+        ), 'success');
+
+        //record logs
+        $this->log(
+            sprintf(
+                'reverted schema: %s',
+                $data['item']['schema']['singular']
+            ),
+            $request,
+            $response,
+            'update',
+            'schema',
+            $data['item']['schema']['name']
+        );
+    }
+
+    return $this->package('global')->redirect($redirect);
+});
+
+/**
+ * Redirect to the Schema Page
+ *
+ * @param Request $request
+ * @param Response $response
+ */
+$this->get('/admin/history/schema/redirect/:history_id', function ($request, $response) {
+    //----------------------------//
+    // 1. Prepare Data
+    //get the versions
+    $this->trigger('history-schema-versions', $request, $response);
+
+    // if errors
+    if ($response->isError()) {
+        //redirect
+        $redirect = '/admin/history/search';
+
+        //this is for flexibility
+        if ($request->hasStage('redirect_uri')) {
+            $redirect = $request->getStage('redirect_uri');
+        }
+
+        //if no redirect
+        if ($redirect === 'false') {
+            return;
+        }
+
+        //add a flash
+        $this->package('global')->flash($response->getMessage(), 'error');
+        return $this->package('global')->redirect($redirect);
+    }
+
+    return $this->package('global')->redirect(sprintf(
+        '/admin/system/schema/update/%s?redurect_uri=%s',
+        $response->getResults('schema', 'name'),
+        urlencode('/admin/system/schema/search')
+    ));
 });
 
 /**
@@ -377,7 +950,7 @@ $this->get('/admin/history/export/:type', function ($request, $response) {
  * @param Request $request
  * @param Response $response
  */
-$cradle->get('/admin/history/:action/logs', function ($request, $response) {
+$this->get('/admin/history/:action/logs', function ($request, $response) {
     if (!$request->hasStage('action')) {
         //Set JSON Content
         return $response->setContent(json_encode([
@@ -390,11 +963,12 @@ $cradle->get('/admin/history/:action/logs', function ($request, $response) {
 
     switch (strtolower($data['action'])) {
         case 'get':
-            $request->setStage('filter', 'history_flag', 0);
-            $request->setStage('nocache', 1);
-            $request->setStage('order', 'history_created', 'DESC');
+            $request
+                ->setStage('schema', 'history')
+                ->setStage('filter', 'history_flag', 0)
+                ->setStage('order', 'history_created', 'DESC');
 
-            $this->trigger('history-search', $request, $response);
+            $this->trigger('system-model-search', $request, $response);
 
             $results = $response->getResults();
 

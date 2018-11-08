@@ -1,0 +1,53 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/admin">
+                <i class="fas fa-home"></i> Admin
+            </a>
+        </li>
+        {{#if relation.suggestion}}
+            <li class="breadcrumb-item">
+                <a href="/admin/system/model/{{relation.schema.name}}/search">
+                    <i class="{{relation.schema.icon}}"></i> {{relation.schema.plural}}
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/admin/system/model/{{relation.schema.name}}/update/{{scope relation.data relation.schema.primary}}">
+                    {{relation.suggestion}}
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/admin/system/model/{{schema.name}}/search/{{relation.schema.name}}/{{scope relation.data relation.schema.primary}}">
+                    <i class="fas fa-{{schema.icon}}"></i> {{schema.plural}}
+                </a>
+            </li>
+        {{else}}
+            <li class="breadcrumb-item">
+                <a href="/admin/system/model/{{schema.name}}/search">
+                    <i class="fas fa-{{schema.icon}}"></i> {{schema.plural}}
+                </a>
+            </li>
+        {{/if}}
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-history"></i> {{title}}
+        </li>
+    </ol>
+</nav>
+
+<div class="main-padding">
+    <h3 class="main-title">
+        <i class="fas fa-history"></i>
+        {{suggest schema.relations.history_profile detail}}
+        {{detail.history_activity}}
+    </h3>
+
+    {{> change_model}}
+
+    <a
+        class="btn btn-orange"
+        href="/admin/history/model/revert/{{detail.history_id}}"
+    >
+        <i class="fas fa-redo"></i>
+        Revert
+    </a>
+</div>

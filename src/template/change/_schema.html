@@ -1,0 +1,111 @@
+<div class="table-overflow">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>{{_ 'Field'}}</th>
+                <th>{{_ 'Before'}}</th>
+                <th>{{_ 'After'}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>{{_ 'Singular'}}</strong></td>
+                <td>{{item.original.singular}}</td>
+                <td>{{item.current.singular}}</td>
+            </tr>
+            <tr>
+                <td><strong>{{_ 'Plural'}}</strong></td>
+                <td>{{item.original.plural}}</td>
+                <td>{{item.current.plural}}</td>
+            </tr>
+            <tr>
+                <td><strong>{{_ 'Name'}}</strong></td>
+                <td>{{item.original.name}}</td>
+                <td>{{item.current.name}}</td>
+            </tr>
+            <tr>
+                <td><strong>{{_ 'Icon'}}</strong></td>
+                <td><i class="{{item.original.icon}}"></i></td>
+                <td><i class="{{item.current.icon}}"></i></td>
+            </tr>
+            <tr>
+                <td><strong>{{_ 'Detail'}}</strong></td>
+                <td>{{item.original.detail}}</td>
+                <td>{{item.current.detail}}</td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <strong>{{_ 'Fields'}}</strong>
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{{_ 'Keyword'}}</th>
+                                <th>{{_ 'Label'}}</th>
+                                <th>{{_ 'Field'}}</th>
+                                <th>{{_ 'List Format'}}</th>
+                                <th>{{_ 'Detail Format'}}</th>
+                                <th>{{_ 'Default'}}</th>
+                                <th>{{_ 'Searchable'}}</th>
+                                <th>{{_ 'Filterable'}}</th>
+                                <th>{{_ 'Sortable'}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each item.original.fields}}
+                                <tr>
+                                    <td>{{name}}</td>
+                                    <td>{{label}}</td>
+                                    <td>{{field.type}}</td>
+                                    <td>{{list.format}}</td>
+                                    <td>{{detail.format}}</td>
+                                    <td>{{#if default}}{{default}}{{else}}--{{/if}}</td>
+                                    <td>{{#if searchable}}Yes{{else}}No{{/if}}</td>
+                                    <td>{{#if filterable}}Yes{{else}}No{{/if}}</td>
+                                    <td>{{#if sortable}}Yes{{else}}No{{/if}}</td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </td>
+                <td>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{{_ 'Keyword'}}</th>
+                                <th>{{_ 'Label'}}</th>
+                                <th>{{_ 'Field'}}</th>
+                                <th>{{_ 'List Format'}}</th>
+                                <th>{{_ 'Detail Format'}}</th>
+                                <th>{{_ 'Default'}}</th>
+                                <th>{{_ 'Searchable'}}</th>
+                                <th>{{_ 'Filterable'}}</th>
+                                <th>{{_ 'Sortable'}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each item.current.fields}}
+                                <tr>
+                                    <td>{{name}}</td>
+                                    <td>{{label}}</td>
+                                    <td>{{field.type}}</td>
+                                    <td>{{list.format}}</td>
+                                    <td>{{detail.format}}</td>
+                                    <td>{{#if default}}{{default}}{{else}}--{{/if}}</td>
+                                    <td>{{#if searchable}}Yes{{else}}No{{/if}}</td>
+                                    <td>{{#if filterable}}Yes{{else}}No{{/if}}</td>
+                                    <td>{{#if sortable}}Yes{{else}}No{{/if}}</td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+</div>

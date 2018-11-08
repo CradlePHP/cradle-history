@@ -29,30 +29,33 @@
             </li>
         {{/if}}
         <li class="breadcrumb-item active" aria-current="page">
-            <i class="fas fa-plus"></i> {{title}}
+            <i class="fas fa-history"></i> {{title}}
         </li>
     </ol>
 </nav>
 
 <div class="main-padding">
-    {{> detail_detail}}
+    <h3 class="main-title">
+        <i class="fas fa-history"></i>
+        {{suggest schema.relations.history_profile detail}}
+        {{detail.history_activity}}
+    </h3>
 
-    {{#if relation.suggestion}}
-        <h3 class="main-title">
-            <i class="{{relation.schema.icon}}"></i>
-            {{relation.suggestion}}
-        </h3>
-    {{/if}}
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="box">
-                <div class="box-head box-default">
-                    <div class="box-title">{{_ 'History Meta'}}</div>
-                </div>
-                <div class="box-body box-padding">
-                    <pre  class="prettyprint linenums" data-do="prettify"><code>{{item.history_meta}}</code></pre>
-                </div>
-            </div>
+    {{#if item.current.length}}
+        {{> change_schema}}
+
+        <a
+            class="btn btn-orange"
+            href="/admin/history/schema/revert/{{detail.history_id}}"
+        >
+            <i class="fas fa-redo"></i>
+            Revert
+        </a>
+    {{else}}
+        <!-- START: NO RESULTS -->
+        <div class="alert alert-info no-results">
+            <center>{{_ 'No Changes Found.'}}</center>
         </div>
-    </div>
+        <!-- END: NO RESULTS -->
+    {{/if}}
 </div>

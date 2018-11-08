@@ -1,0 +1,72 @@
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>{{_ 'Field'}}</th>
+            <th>{{_ 'Before'}}</th>
+            <th>{{_ 'After'}}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#if item.schema.fields}}
+            {{#each item.schema.fields}}
+                {{#when detail.format '!==' 'hide'}}
+                    {{#notin 'created,updated' field.type}}
+                        <tr>
+                            <td><strong>{{label}}</strong></td>
+                            <td>
+                                {{#../item.original}}
+                                    {{#scope this ../@key}}
+                                        {{> change_value}}
+                                    {{else}}
+                                        {{#noop ../../item.noop}}
+                                            {{> change_value}}
+                                        {{/noop}}
+                                    {{/scope}}
+                                {{/../item.original}}
+                            </td>
+                            <td>
+                                {{#../item.current}}
+                                    {{#scope this ../@key}}
+                                        {{> change_value}}
+                                    {{else}}
+                                        {{#noop ../../item.noop}}
+                                            {{> change_value}}
+                                        {{/noop}}
+                                    {{/scope}}
+                                {{/../item.current}}
+                            </td>
+                        </tr>
+                    {{/notin}}
+                {{/when}}
+            {{/each}}
+        {{else}}
+            {{#each item.current}}
+                <td><strong>{{@key}}</strong></td>
+                <td>
+                    {{#scope ../item.original @key}}
+                        {{#is_array this}}
+                            <pre
+                                class="prettyprint linenums"
+                                data-do="prettify"
+                            ><code>{{{json_pretty this}}}</code></pre>
+                        {{else}}
+                            {{this}}
+                        {{/is_array}}
+                    {{/scope}}
+                </td>
+                <td>
+                    {{#scope ../item.current @key}}
+                        {{#is_array this}}
+                            <pre
+                                class="prettyprint linenums"
+                                data-do="prettify"
+                            ><code>{{{json_pretty this}}}</code></pre>
+                        {{else}}
+                            {{this}}
+                        {{/is_array}}
+                    {{/scope}}
+                </td>
+            {{/each}}
+        {{/if}}
+    </tbody>
+</table>

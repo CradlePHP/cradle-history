@@ -35,7 +35,9 @@
             <i class="fa fa-{{schema.icon}}"></i>
             {{number total}} {{schema.plural}}
             {{#if q.0}}
-                matching {{q.0}}
+                matching {{q.0}}<a href="/admin/history/detail/{{scope this ../schema.primary}}" title="{{_ 'View History Detail'}}">
+                    <i class="fas fa-history"></i>
+                </a>
             {{/if}}
         </h3>
     {{/when}}
@@ -89,8 +91,29 @@
                         {{#each rows}}
                             <tr data-id="{{scope this ../schema.primary}}">
                                 <td>
-                                    <a href="/admin/history/detail/{{scope this ../schema.primary}}" title="{{_ 'View History Detail'}}">
-                                        <i class="fas fa-history"></i>
+                                    {{#when history_type '===' 'update'}}
+                                        <a
+                                            class="text-purple"
+                                            href="/admin/history/changes/{{scope this ../schema.primary}}"
+                                            title="{{_ 'View Changes'}}"
+                                        >
+                                            <i class="fas fa-history"></i>
+                                        </a>
+                                        &nbsp;
+                                    {{/when}}
+                                    <a
+                                        href="/admin/history/redirect/{{scope this ../schema.primary}}"
+                                        title="{{_ 'View Item'}}"
+                                    >
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    &nbsp;
+                                    <a
+                                        class="text-danger"
+                                        href="/admin/history/json/{{scope this ../schema.primary}}"
+                                        title="{{_ 'View Log'}}"
+                                    >
+                                        <i class="fas fa-code"></i>
                                     </a>
                                 </td>
                                 <td>{{scope this ../schema.primary}}</td>
@@ -126,7 +149,7 @@
 
         <!-- START: NO RESULTS -->
         <div class="alert alert-info no-results">
-            <center>No Results Found.</center>
+            <center>{{_ 'No Results Found.'}}</center>
         </div>
         <!-- END: NO RESULTS -->
     {{/if}}

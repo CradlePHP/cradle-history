@@ -1,0 +1,38 @@
+{{#each revisions}}
+    <hr />
+    <p>
+        {{#each ../schema.relations}}
+            {{#when name '===' 'profile'}}
+                <strong>{{suggest this ../detail}}</strong>
+            {{/when}}
+        {{/each}}
+        {{detail.history_activity}} on {{date detail.history_created 'F d, Y g:iA'}}
+    </p>
+    {{#when detail.history_type '===' 'update'}}
+        {{#when ../table '===' 'schema'}}
+            {{> change_schema}}
+
+            <div class="mb-4">
+                <a
+                    class="btn btn-orange"
+                    href="/admin/history/schema/revert/{{detail.history_id}}"
+                >
+                    <i class="fas fa-redo"></i>
+                    Revert
+                </a>
+            </div>
+        {{else}}
+            {{> change_model}}
+
+            <div class="mb-4">
+                <a
+                    class="btn btn-orange"
+                    href="/admin/history/model/revert/{{detail.history_id}}"
+                >
+                    <i class="fas fa-redo"></i>
+                    Revert
+                </a>
+            </div>
+        {{/when}}
+    {{/when}}
+{{/each}}

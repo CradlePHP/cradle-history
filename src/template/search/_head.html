@@ -8,21 +8,49 @@
     </th>
     {{#each schema.relations}}
         {{#when many '==' 1}}
-            <th>{{singular}}</th>
+            {{#when name '===' 'profile'}}
+                <th>{{_ 'Who'}}</th>
+            {{else}}
+                <th>{{singular}}</th>
+            {{/when}}
         {{/when}}
     {{/each}}
     {{#each schema.fields}}
         {{#in ../schema.listable @key}}
-            {{#in ../schema.sortable @key}}
-                <th>
+            <th>
+                {{#in ../schema.sortable @key}}
                     <a href="?{{sorturl 'order' @key}}">
-                        {{label}}
+                        {{#when name '===' 'activity'}}
+                            {{_ 'What'}}
+                        {{else}}
+                            {{#when name '===' 'remote_address'}}
+                                {{_ 'Where'}}
+                            {{else}}
+                                {{#when name '===' 'created'}}
+                                    {{_ 'When'}}
+                                {{else}}
+                                    {{label}}
+                                {{/when}}
+                            {{/when}}
+                        {{/when}}
                         {{{sortcaret 'order' @key}}}
                     </a>
-                </th>
-            {{else}}
-                <th>{{label}}</th>
-            {{/in}}
+                {{else}}
+                    {{#when name '===' 'activity'}}
+                        {{_ 'What'}}
+                    {{else}}
+                        {{#when name '===' 'remote_address'}}
+                            {{_ 'Where'}}
+                        {{else}}
+                            {{#when name '===' 'created'}}
+                                {{_ 'When'}}
+                            {{else}}
+                                {{label}}
+                            {{/when}}
+                        {{/when}}
+                    {{/when}}
+                {{/in}}
+            </th>
         {{/in}}
     {{/each}}
 </tr>
