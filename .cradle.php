@@ -17,6 +17,12 @@ $this->addLogger(function(
     $table = null,
     $id = null
 ) {
+    // let's ignore CLI
+    if (php_sapi_name() === 'cli') {
+        echo $message . PHP_EOL;
+        return;
+    }
+
     if (is_null($type)) {
         switch (true) {
             case strpos($message, 'created') !== FALSE:
