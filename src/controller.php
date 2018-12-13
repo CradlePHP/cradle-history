@@ -131,7 +131,6 @@ $this->get('/admin/history/search', function ($request, $response) {
                 'search_form',
                 'search_filters',
                 'search_actions',
-                'search_row_format',
                 'search_row_actions'
             ],
             $template,

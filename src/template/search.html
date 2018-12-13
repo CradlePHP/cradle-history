@@ -129,7 +129,15 @@
                                         </td>
                                     {{/when}}
                                 {{/each}}
-                                {{> search_row_format}}
+                                {{#format 'list' ../schema.name this}}
+                                    {{#each formats}}
+                                        {{#in 'number,price,formula' config.format}}
+                                            <td class="text-right">{{{value}}}</td>
+                                        {{else}}
+                                            <td>{{{value}}}</td>
+                                        {{/in}}
+                                    {{/each}}
+                                {{/format}}
                             </tr>
                         {{/each}}
                     </tbody>
