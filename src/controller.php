@@ -548,7 +548,6 @@ $this->get('/admin/history/model/changes/:history_id', function ($request, $resp
             'change/model',
             $data,
             [
-                'change_value',
                 'change_model'
             ],
             $template,
