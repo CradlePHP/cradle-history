@@ -293,7 +293,7 @@ $this->get('/admin/history/changes/:history_id', function ($request, $response) 
 
     //add a flash
     $this->package('global')->flash($response->getMessage(), 'error');
-    return $this->package('global')->redirect($redirect);
+    $this->package('global')->redirect($redirect);
 });
 
 /**
@@ -471,7 +471,7 @@ $this->get('/admin/history/redirect/:history_id', function ($request, $response)
 
     //add a flash
     $this->package('global')->flash($response->getMessage(), 'error');
-    return $this->package('global')->redirect($redirect);
+    $this->package('global')->redirect($redirect);
 });
 
 /**
@@ -654,7 +654,7 @@ $this->get('/admin/history/model/revert/:history_id', function ($request, $respo
         );
     }
 
-    return $this->package('global')->redirect($redirect);
+    $this->package('global')->redirect($redirect);
 });
 
 /**
@@ -703,7 +703,7 @@ $this->get('/admin/history/model/redirect/:history_id', function ($request, $res
     $primary = $response->getResults('schema', 'primary');
     $original = $response->getResults('original');
 
-    return $this->package('global')->redirect(sprintf(
+    $this->package('global')->redirect(sprintf(
         '/admin/system/model/%s/detail/%s',
         $response->getResults('schema', 'name'),
         $original[$primary]
@@ -876,7 +876,7 @@ $this->get('/admin/history/schema/revert/:history_id', function ($request, $resp
         );
     }
 
-    return $this->package('global')->redirect($redirect);
+    $this->package('global')->redirect($redirect);
 });
 
 /**
@@ -911,7 +911,7 @@ $this->get('/admin/history/schema/redirect/:history_id', function ($request, $re
         return $this->package('global')->redirect($redirect);
     }
 
-    return $this->package('global')->redirect(sprintf(
+    $this->package('global')->redirect(sprintf(
         '/admin/system/schema/update/%s?redurect_uri=%s',
         $response->getResults('schema', 'name'),
         urlencode('/admin/system/schema/search')
