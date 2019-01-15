@@ -1,11 +1,14 @@
 <?php //-->
 /**
- * This file is part of a Custom Package.
+ * This file is part of a package designed for the CradlePHP Project.
+ *
+ * Copyright and license information can be found at LICENSE.txt
+ * distributed with this package.
  */
 require_once __DIR__ . '/package/events.php';
+require_once __DIR__ . '/package/helpers.php';
 require_once __DIR__ . '/src/events.php';
 require_once __DIR__ . '/src/controller.php';
-require_once __DIR__ . '/package/helpers.php';
 
 use Cradle\Package\System\Schema;
 

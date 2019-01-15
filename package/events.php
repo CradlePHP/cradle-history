@@ -1,6 +1,9 @@
 <?php //-->
 /**
- * This file is part of a Custom Package.
+ * This file is part of a package designed for the CradlePHP Project.
+ *
+ * Copyright and license information can be found at LICENSE.txt
+ * distributed with this package.
  */
 
 use Cradle\Storm\SqlFactory;
@@ -341,7 +344,7 @@ $this->on('cradlephp-cradle-history-redis-flush', function ($request, $response)
     // remove cached search and detail from redis
     $redis->removeSearch();
     $redis->removeDetail();
-    
+
     $response->setResults('schema', 'history');
 });
 
@@ -378,11 +381,11 @@ $this->on('cradlephp-cradle-history-redis-populate', function ($request, $respon
                 $redis->createDetail($slug . '-' . $entry[$slug], $entry);
             }
         }
-        
+
     }
 
     $response->setResults('schema', 'history');
-    
+
 });
 
 /**
