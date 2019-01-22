@@ -56,7 +56,7 @@ $this->on('system-model-detail', function ($request, $response) {
 
     // set history meta
     $response->setResults('history_meta', json_decode($contents, true));
-}, 10);
+}, -10);
 
 /**
  * Get Schema History Versions
