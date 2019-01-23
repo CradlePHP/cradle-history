@@ -4,6 +4,7 @@ return [
     'singular' => 'History',
     'plural' => 'History',
     'name' => 'history',
+    'group' => 'Users',
     'icon' => 'fas fa-history',
     'detail' => 'Generic history designed to log all activities on the system.',
     'fields' => [
