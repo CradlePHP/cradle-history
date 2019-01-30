@@ -11,6 +11,8 @@ require_once __DIR__ . '/src/events.php';
 require_once __DIR__ . '/src/controller.php';
 
 use Cradle\Package\System\Schema;
+use Cradle\Http\Request\RequestInterface;
+use Cradle\Http\Response\ResponseInterface;
 
 $this->addLogger(function(
     $message,
@@ -20,6 +22,14 @@ $this->addLogger(function(
     $table = null,
     $id = null
 ) {
+    //argument test
+    if (!is_string($message)
+        || !($request instanceof RequestInterface)
+        || !($response instanceof ResponseInterface)
+    ) {
+        reutrn;
+    }
+
     // let's ignore CLI
     if (php_sapi_name() === 'cli') {
         echo $message . PHP_EOL;
