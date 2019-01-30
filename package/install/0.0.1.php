@@ -1,16 +1,10 @@
 <?php //-->
-/**
- * This file is part of a package designed for the CradlePHP Project.
- *
- * Copyright and license information can be found at LICENSE.txt
- * distributed with this package.
- */
-cradle(function() {
-    //setup a new RnR
-    $payload = $this->makePayload();
 
+use Cradle\Package\System\Schema;
+
+cradle(function() {
     //setup result counters
-    $errors = [];
+    $logs = [];
     $processed = [];
 
     //scan through each file
@@ -29,6 +23,9 @@ cradle(function() {
             //skip
             continue;
         }
+
+        //setup a new RnR
+        $payload = $this->makePayload();
 
         //set the data
         $payload['request']->setStage($data);
@@ -56,6 +53,11 @@ cradle(function() {
             $payload['request']->setStage('validation', []);
         }
 
+        $logs[] = [
+            'type' => 'info',
+            'message' => sprintf('Creating %s schema', $data['name'])
+        ];
+
         //----------------------------//
         // 2. Process Request
         //now trigger
@@ -67,19 +69,58 @@ cradle(function() {
 
         //----------------------------//
         // 3. Interpret Results
-        //if the event returned an error
-        if ($payload['response']->isError()) {
-            //collect all the errors
-            $errors[$data['name']] = $payload['response']->getValidation();
+        //if the event does hot have an error
+        if (!$payload['response']->isError()) {
+            $processed[] = $data['name'];
             continue;
         }
 
-        $processed[] = $data['name'];
+        $errors = $payload['response']->getValidation();
+        foreach($errors as $key => $message) {
+            if ($message !== 'Schema already exists') {
+                $message = sprintf('Schema %s already exists', $data['name']);
+            }
+
+            $logs[] = ['type' => 'error', 'message' => $message];
+        }
+
+        if ($this->getRequest()->hasStage('skip-sql')) {
+            $this->getResponse()->setError(true);
+            continue;
+        }
+
+        $logs[] = [
+            'type' => 'info',
+            'message' => sprintf('Creating %s table in SQL', $data['name'])
+        ];
+
+        $exists = Schema::i($data['name'])
+            ->service('sql')
+            ->getResource()
+            ->getTables($data['name']);
+
+        if ($exists) {
+            $logs[] = [
+                'type' => 'error',
+                'message' => sprintf('Table %s already exists in SQL', $data['name'])
+            ];
+
+            continue;
+        }
+
+        Schema::i($data['name'])->service('sql')->create($data);
     }
 
-    if (!empty($errors)) {
-        $this->getResponse()->set('json', 'validation', $errors);
+    $response = $this->getResponse();
+    $schemas = $response->getResults('schemas');
+
+    if (!is_array($schemas)) {
+        $schemas = [];
     }
 
-    $this->getResponse()->setResults('schemas', $processed);
+    $schemas = array_merge($schemas, $processed);
+
+    $response
+        ->setResults('logs', 'cradlephp/cradle-history', '0.0.1', $logs)
+        ->setResults('schemas', $schemas);
 });
