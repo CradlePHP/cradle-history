@@ -69,17 +69,19 @@ $this->addLogger(function(
         ->setStage('history_table_name', $table)
         ->setStage('history_table_id', $id);
 
+    $global = $this->package('global');
+
     //try to get the log path from settings
-    $logPath = $this->package('global')->config('settings', 'log_path');
+    $logPath = $global->config('settings', 'log_path');
 
     // if log path is not set
     if (!$logPath) {
         // set default log path
-        $logPath = $this->package('global')->path('root') . '/log';
+        $logPath = $global->path('root') . '/log';
     // if relative path
     } else if (strpos($logPath, '/') !== 0) {
         // set absolute path
-        $logPath = $this->package('global')->path('root') . '/' . $logPath;
+        $logPath = $global->path('root') . '/' . $logPath;
     }
 
     //generate uniq file name
