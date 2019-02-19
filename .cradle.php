@@ -27,7 +27,7 @@ $this->addLogger(function(
         || !($request instanceof RequestInterface)
         || !($response instanceof ResponseInterface)
     ) {
-        reutrn;
+        return;
     }
 
     // let's ignore CLI
