@@ -31,7 +31,8 @@ $this->on('system-model-detail', function ($request, $response) {
     }
 
     // get the log path root
-    $root = $this->package('global')->config('settings', 'log_path');
+    $global = $this->package('global');
+    $root = $global->config('settings', 'log_path');
 
     // if no log path
     if (!trim($root)) {
@@ -41,7 +42,7 @@ $this->on('system-model-detail', function ($request, $response) {
 
     // case for relative path
     if (strpos($root, '/') !== 0) {
-        $root = $this->package('global')->path('root') . '/' . $root;
+        $root = $global->path('root') . '/' . $root;
     }
 
     // get the history log file

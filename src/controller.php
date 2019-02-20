@@ -162,6 +162,7 @@ $this->get('/admin/history/search', function ($request, $response) {
  * @param Response $response
  */
 $this->get('/admin/history/json/:history_id', function ($request, $response) {
+    $global = $this->package('global');
     //get the logs
     $request->setStage('schema', 'history');
     $this->trigger('system-model-detail', $request, $response);
@@ -182,8 +183,8 @@ $this->get('/admin/history/json/:history_id', function ($request, $response) {
         }
 
         //add a flash
-        $this->package('global')->flash($response->getMessage(), 'error');
-        return $this->package('global')->redirect($redirect);
+        $global->flash($response->getMessage(), 'error');
+        return $global->redirect($redirect);
     }
 
     //if we only want the raw data
@@ -209,7 +210,7 @@ $this->get('/admin/history/json/:history_id', function ($request, $response) {
     $class = 'page-admin-history-detail page-admin';
 
     //determine the title
-    $data['title'] = $this->package('global')->translate(
+    $data['title'] = $global->translate(
         'Viewing Raw Log for #%s',
         $request->getStage('history_id')
     );
@@ -295,8 +296,9 @@ $this->get('/admin/history/changes/:history_id', function ($request, $response) 
     }
 
     //add a flash
-    $this->package('global')->flash($response->getMessage(), 'error');
-    $this->package('global')->redirect($redirect);
+    $global = $this->package('global');
+    $global->flash($response->getMessage(), 'error');
+    $global->redirect($redirect);
 });
 
 /**
@@ -473,8 +475,9 @@ $this->get('/admin/history/redirect/:history_id', function ($request, $response)
     }
 
     //add a flash
-    $this->package('global')->flash($response->getMessage(), 'error');
-    $this->package('global')->redirect($redirect);
+    $global = $this->package('global');
+    $global->flash($response->getMessage(), 'error');
+    $global->redirect($redirect);
 });
 
 /**
@@ -484,6 +487,7 @@ $this->get('/admin/history/redirect/:history_id', function ($request, $response)
  * @param Response $response
  */
 $this->get('/admin/history/model/changes/:history_id', function ($request, $response) {
+    $global = $this->package('global');
     //get the versions
     $this->trigger('history-model-versions', $request, $response);
 
@@ -503,8 +507,8 @@ $this->get('/admin/history/model/changes/:history_id', function ($request, $resp
         }
 
         //add a flash
-        $this->package('global')->flash($response->getMessage(), 'error');
-        return $this->package('global')->redirect($redirect);
+        $global->flash($response->getMessage(), 'error');
+        return $global->redirect($redirect);
     }
 
     //if we only want the raw data
@@ -529,7 +533,7 @@ $this->get('/admin/history/model/changes/:history_id', function ($request, $resp
     $class = 'page-admin-history-detail page-admin';
 
     //determine the title
-    $data['title'] = $this->package('global')->translate(
+    $data['title'] = $global->translate(
         'Viewing Changes for #%s',
         $request->getStage('history_id')
     );
@@ -579,6 +583,7 @@ $this->get('/admin/history/model/changes/:history_id', function ($request, $resp
  * @param Response $response
  */
 $this->get('/admin/history/model/revert/:history_id', function ($request, $response) {
+    $global = $this->package('global');
     //get the versions
     $this->trigger('history-model-versions', $request, $response);
 
@@ -598,8 +603,8 @@ $this->get('/admin/history/model/revert/:history_id', function ($request, $respo
         }
 
         //add a flash
-        $this->package('global')->flash($response->getMessage(), 'error');
-        return $this->package('global')->redirect($redirect);
+        $global->flash($response->getMessage(), 'error');
+        return $global->redirect($redirect);
     }
 
     $data['detail'] = $response->getResults('history');
@@ -635,9 +640,9 @@ $this->get('/admin/history/model/revert/:history_id', function ($request, $respo
     //interpret
     if ($response->isError()) {
         //add a flash
-        $this->package('global')->flash($response->getMessage(), 'error');
+        $global->flash($response->getMessage(), 'error');
     } else {
-        $this->package('global')->flash(sprintf(
+        $global->flash(sprintf(
             '%s was successfully reverted',
             $data['detail']['history_table_name']
         ), 'success');
@@ -657,7 +662,7 @@ $this->get('/admin/history/model/revert/:history_id', function ($request, $respo
         );
     }
 
-    $this->package('global')->redirect($redirect);
+    $global->redirect($redirect);
 });
 
 /**
@@ -669,6 +674,7 @@ $this->get('/admin/history/model/revert/:history_id', function ($request, $respo
 $this->get('/admin/history/model/redirect/:history_id', function ($request, $response) {
     //----------------------------//
     // 1. Prepare Data
+    $global = $this->package('global');
     //get the versions
     $this->trigger('history-model-versions', $request, $response);
 
@@ -688,8 +694,8 @@ $this->get('/admin/history/model/redirect/:history_id', function ($request, $res
         }
 
         //add a flash
-        $this->package('global')->flash($response->getMessage(), 'error');
-        return $this->package('global')->redirect($redirect);
+        $global->flash($response->getMessage(), 'error');
+        return $global->redirect($redirect);
     }
 
     if (!$response->getResults('schema', 'name')) {
@@ -699,14 +705,14 @@ $this->get('/admin/history/model/redirect/:history_id', function ($request, $res
         }
 
         //add a flash
-        $this->package('global')->flash('Not Found', 'error');
-        return $this->package('global')->redirect($redirect);
+        $global->flash('Not Found', 'error');
+        return $global->redirect($redirect);
     }
 
     $primary = $response->getResults('schema', 'primary');
     $original = $response->getResults('original');
 
-    $this->package('global')->redirect(sprintf(
+    $global->redirect(sprintf(
         '/admin/system/model/%s/detail/%s',
         $response->getResults('schema', 'name'),
         $original[$primary]
@@ -720,6 +726,7 @@ $this->get('/admin/history/model/redirect/:history_id', function ($request, $res
  * @param Response $response
  */
 $this->get('/admin/history/schema/changes/:history_id', function ($request, $response) {
+    $global = $this->package('global');
     //get the versions
     $this->trigger('history-schema-versions', $request, $response);
 
@@ -739,8 +746,8 @@ $this->get('/admin/history/schema/changes/:history_id', function ($request, $res
         }
 
         //add a flash
-        $this->package('global')->flash($response->getMessage(), 'error');
-        return $this->package('global')->redirect($redirect);
+        $global->flash($response->getMessage(), 'error');
+        return $global->redirect($redirect);
     }
 
     //if we only want the raw data
@@ -762,7 +769,7 @@ $this->get('/admin/history/schema/changes/:history_id', function ($request, $res
     $class = 'page-admin-history-detail page-admin';
 
     //determine the title
-    $data['title'] = $this->package('global')->translate(
+    $data['title'] = $global->translate(
         'Viewing Changes for #%s',
         $request->getStage('history_id')
     );
@@ -812,6 +819,7 @@ $this->get('/admin/history/schema/changes/:history_id', function ($request, $res
  * @param Response $response
  */
 $this->get('/admin/history/schema/revert/:history_id', function ($request, $response) {
+    $global = $this->package('global');
     //get the versions
     $this->trigger('history-schema-versions', $request, $response);
 
@@ -831,8 +839,8 @@ $this->get('/admin/history/schema/revert/:history_id', function ($request, $resp
         }
 
         //add a flash
-        $this->package('global')->flash($response->getMessage(), 'error');
-        return $this->package('global')->redirect($redirect);
+        $global->flash($response->getMessage(), 'error');
+        return $global->redirect($redirect);
     }
 
     $data['detail'] = $response->getResults('history');
@@ -858,9 +866,9 @@ $this->get('/admin/history/schema/revert/:history_id', function ($request, $resp
     //interpret
     if ($response->isError()) {
         //add a flash
-        $this->package('global')->flash($response->getMessage(), 'error');
+        $global->flash($response->getMessage(), 'error');
     } else {
-        $this->package('global')->flash(sprintf(
+        $global->flash(sprintf(
             '%s was successfully reverted',
             $data['item']['schema']['singular']
         ), 'success');
@@ -879,7 +887,7 @@ $this->get('/admin/history/schema/revert/:history_id', function ($request, $resp
         );
     }
 
-    $this->package('global')->redirect($redirect);
+    $global->redirect($redirect);
 });
 
 /**
@@ -891,6 +899,7 @@ $this->get('/admin/history/schema/revert/:history_id', function ($request, $resp
 $this->get('/admin/history/schema/redirect/:history_id', function ($request, $response) {
     //----------------------------//
     // 1. Prepare Data
+        $global = $this->package('global');
     //get the versions
     $this->trigger('history-schema-versions', $request, $response);
 
@@ -910,11 +919,11 @@ $this->get('/admin/history/schema/redirect/:history_id', function ($request, $re
         }
 
         //add a flash
-        $this->package('global')->flash($response->getMessage(), 'error');
-        return $this->package('global')->redirect($redirect);
+        $global->flash($response->getMessage(), 'error');
+        return $global->redirect($redirect);
     }
 
-    $this->package('global')->redirect(sprintf(
+    $global->redirect(sprintf(
         '/admin/system/schema/update/%s?redurect_uri=%s',
         $response->getResults('schema', 'name'),
         urlencode('/admin/system/schema/search')
