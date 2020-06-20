@@ -20,6 +20,6 @@
         "php-coveralls/php-coveralls": "~2.1.0"
     },
     "require": {
-        "cradlephp/cradle-profile": "~2.2.0"
+        "cradlephp/cradle-profile": "~2.3.0"
     }
 }
